@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch.autograd import Variable
 import utils
@@ -8,11 +9,12 @@ import models.crnn as crnn
 
 
 model_path = './data/crnn.pth'
-img_path = './data/demo.png'
+img_path = './data/a.png'
 alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
 
 model = crnn.CRNN(32, 1, 37, 256)
 if torch.cuda.is_available():
+    print('using GPU')
     model = model.cuda()
 print('loading pretrained model from %s' % model_path)
 model.load_state_dict(torch.load(model_path))
@@ -20,12 +22,24 @@ model.load_state_dict(torch.load(model_path))
 converter = utils.strLabelConverter(alphabet)
 
 transformer = dataset.resizeNormalize((100, 32))
-image = Image.open(img_path).convert('L')
+image = Image.open(img_path)
+print(image.format, image.size, image.mode)
+im2arr = np.array(image)
+print(im2arr.shape)
+
+image = image.convert('L')
+print(image.format, image.size, image.mode)
+im2arr = np.array(image)
+print(im2arr.shape)
+
+
 image = transformer(image)
 if torch.cuda.is_available():
     image = image.cuda()
 image = image.view(1, *image.size())
 image = Variable(image)
+
+
 
 model.eval()
 preds = model(image)

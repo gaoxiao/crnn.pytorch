@@ -26,10 +26,10 @@ class CRNN(nn.Module):
         super(CRNN, self).__init__()
         assert imgH % 16 == 0, 'imgH has to be a multiple of 16'
 
-        ks = [3, 3, 3, 3, 3, 3, 2]
-        ps = [1, 1, 1, 1, 1, 1, 0]
-        ss = [1, 1, 1, 1, 1, 1, 1]
-        nm = [64, 128, 256, 256, 512, 512, 512]
+        ks = [3, 3, 3, 3, 3, 3, 2]  # kernel size
+        ss = [1, 1, 1, 1, 1, 1, 1]  # stride size
+        ps = [1, 1, 1, 1, 1, 1, 0]  # padding size
+        nm = [64, 128, 256, 256, 512, 512, 512]  # CNN channel number
 
         cnn = nn.Sequential()
 
