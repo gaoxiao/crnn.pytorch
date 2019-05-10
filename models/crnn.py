@@ -10,6 +10,7 @@ class BidirectionalLSTM(nn.Module):
         self.embedding = nn.Linear(nHidden * 2, nOut)
 
     def forward(self, input):
+        # **output** of shape `(seq_len, batch, num_directions * hidden_size)`
         recurrent, _ = self.rnn(input)
         T, b, h = recurrent.size()
         t_rec = recurrent.view(T * b, h)
