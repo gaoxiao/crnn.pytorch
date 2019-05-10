@@ -1,20 +1,22 @@
-from __future__ import print_function
 from __future__ import division
+from __future__ import print_function
 
 import argparse
+import os
 import random
+
+import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
 from torch.autograd import Variable
-import numpy as np
 from warpctc_pytorch import CTCLoss
-import os
-import utils
-import dataset
+from tensorboardX import SummaryWriter
 
+import dataset
 import models.crnn as crnn
+import utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trainRoot', required=True, help='path to dataset')
@@ -30,7 +32,8 @@ parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--pretrained', default='', help="path to pretrained model (to continue training)")
 # parser.add_argument('--alphabet', type=str, default='0123456789abcdefghijklmnopqrstuvwxyz')
-parser.add_argument('--alphabet', type=str, default=" !$%&'()*+-./0123456789:?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\_abcdefghijklmnopqrstuvwxyz£®Ç€")
+parser.add_argument('--alphabet', type=str,
+                    default=" !$%&'()*+-./0123456789:?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\_abcdefghijklmnopqrstuvwxyz£®Ç€")
 parser.add_argument('--expr_dir', default='expr', help='Where to store samples and models')
 parser.add_argument('--displayInterval', type=int, default=500, help='Interval to be displayed')
 parser.add_argument('--n_test_disp', type=int, default=10, help='Number of samples to display when test')
@@ -45,6 +48,8 @@ parser.add_argument('--manualSeed', type=int, default=1234, help='reproduce expe
 parser.add_argument('--random_sample', action='store_true', help='whether to sample the dataset with random sampler')
 opt = parser.parse_args()
 print(opt)
+
+writer = SummaryWriter()
 
 if not os.path.exists(opt.expr_dir):
     os.makedirs(opt.expr_dir)
@@ -106,6 +111,10 @@ if opt.cuda:
     image = image.cuda()
     criterion = criterion.cuda()
 
+# Load pretrained model.
+# model_path = '/home/xiao/code/crnn.pytorch/expr/netCRNN_99_40.pth'
+# crnn.load_state_dict(torch.load(model_path))
+
 image = Variable(image)
 text = Variable(text)
 length = Variable(length)
@@ -123,7 +132,7 @@ else:
     optimizer = optim.RMSprop(crnn.parameters(), lr=opt.lr)
 
 
-def val(net, dataset, criterion, max_iter=100):
+def val(net, dataset, criterion, idx, max_iter=100):
     print('Start val')
 
     for p in crnn.parameters():
@@ -165,8 +174,13 @@ def val(net, dataset, criterion, max_iter=100):
     raw_preds = converter.decode(preds.data, preds_size.data, raw=True)[:opt.n_test_disp]
     for raw_pred, pred, gt in zip(raw_preds, sim_preds, cpu_texts):
         print('%-20s => %-20s, gt: %-20s' % (raw_pred, pred, gt))
+        writer.add_text('Text', '%-20s => %-20s, gt: %-20s' % (raw_pred, pred, gt), idx)
 
     accuracy = n_correct / float(max_iter * opt.batchSize)
+
+    writer.add_scalars('data/loss', {'val': loss_avg.val()}, idx)
+    writer.add_scalar('data/val_accuracy', accuracy, idx)
+
     print('Test loss: %f, accuray: %f' % (loss_avg.val(), accuracy))
 
 
@@ -200,15 +214,20 @@ for epoch in range(opt.nepoch):
         loss_avg.add(cost)
         i += 1
 
+        idx = epoch * len(train_loader) + i
+        writer.add_scalars('data/loss', {'train': loss_avg.val()}, idx)
+
         if i % opt.displayInterval == 0:
             print('[%d/%d][%d/%d] Loss: %f' %
                   (epoch, opt.nepoch, i, len(train_loader), loss_avg.val()))
             loss_avg.reset()
 
         if i % opt.valInterval == 0:
-            val(crnn, test_dataset, criterion)
+            val(crnn, test_dataset, criterion, idx)
 
         # do checkpointing
         if i % opt.saveInterval == 0:
             torch.save(
                 crnn.state_dict(), '{0}/netCRNN_{1}_{2}.pth'.format(opt.expr_dir, epoch, i))
+
+writer.close()

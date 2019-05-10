@@ -7,6 +7,6 @@ python train.py --adadelta \
 --random_sample \
 --displayInterval 10 \
 --batchSize 64 \
---nepoch 100 \
---valInterval 30 \
---saveInterval 10
+--nepoch 300 \
+--valInterval 40 \
+--saveInterval 40
