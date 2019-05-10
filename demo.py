@@ -7,17 +7,31 @@ from PIL import Image
 
 import models.crnn as crnn
 
-
-model_path = './data/crnn.pth'
+# model_path = './data/crnn.pth'
+model_path = '/home/xiao/code/crnn.pytorch/expr/netCRNN_99_40.pth'
 img_path = './data/a.png'
-alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
+# img_path = '/home/xiao/code/crnn.pytorch/dataset/train/word_865.png'
+# alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
+alphabet = " !$%&'()*+-./0123456789:?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\_abcdefghijklmnopqrstuvwxyz£®Ç€"
 
-model = crnn.CRNN(32, 1, 37, 256)
+model = crnn.CRNN(32, 1, len(alphabet) + 1, 256)
 if torch.cuda.is_available():
     print('using GPU')
     model = model.cuda()
 print('loading pretrained model from %s' % model_path)
-model.load_state_dict(torch.load(model_path))
+
+state_dict = torch.load(model_path)
+from collections import OrderedDict
+
+new_state_dict = OrderedDict()
+for k, v in state_dict.items():
+    if k.startswith('module.'):
+        k = k[7:]  # remove `module.`
+    new_state_dict[k] = v
+# load params
+model.load_state_dict(new_state_dict)
+
+# model.load_state_dict(torch.load(model_path))
 
 converter = utils.strLabelConverter(alphabet)
 
@@ -32,14 +46,11 @@ print(image.format, image.size, image.mode)
 im2arr = np.array(image)
 print(im2arr.shape)
 
-
 image = transformer(image)
 if torch.cuda.is_available():
     image = image.cuda()
 image = image.view(1, *image.size())
 image = Variable(image)
-
-
 
 model.eval()
 preds = model(image)

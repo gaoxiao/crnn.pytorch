@@ -151,11 +151,11 @@ def val(net, dataset, criterion, max_iter=100):
 
         preds = crnn(image)
         preds_size = Variable(torch.IntTensor([preds.size(0)] * batch_size))
-        cost = criterion(preds, text, preds_size, length) / batch_size
+        cost = criterion(preds.cpu(), text.cpu(), preds_size.cpu(), length.cpu()) / batch_size
         loss_avg.add(cost)
 
         _, preds = preds.max(2)
-        preds = preds.squeeze(2)
+        # preds = preds.squeeze(2)
         preds = preds.transpose(1, 0).contiguous().view(-1)
         sim_preds = converter.decode(preds.data, preds_size.data, raw=False)
         for pred, target in zip(sim_preds, cpu_texts):
@@ -181,7 +181,7 @@ def trainBatch(net, criterion, optimizer):
 
     preds = crnn(image)
     preds_size = Variable(torch.IntTensor([preds.size(0)] * batch_size))
-    cost = criterion(preds, text, preds_size, length) / batch_size
+    cost = criterion(preds.cpu(), text.cpu(), preds_size.cpu(), length.cpu()) / batch_size
     crnn.zero_grad()
     cost.backward()
     optimizer.step()
