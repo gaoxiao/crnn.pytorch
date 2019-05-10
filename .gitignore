@@ -7,3 +7,6 @@
 dataset/
 .idea/
 .python-version
+runs/
+tool/val/
+tool/train/
