@@ -5,8 +5,8 @@ python train.py --adadelta \
 --valRoot tool/val \
 --cuda \
 --random_sample \
---displayInterval 10 \
+--displayInterval 100 \
 --batchSize 64 \
---nepoch 300 \
---valInterval 40 \
---saveInterval 40
+--nepoch 25 \
+--valInterval 100 \
+--saveInterval 200

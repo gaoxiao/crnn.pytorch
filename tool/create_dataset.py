@@ -1,6 +1,8 @@
 import os
-import lmdb  # install lmdb by "pip install lmdb"
+import re
+
 import cv2
+import lmdb  # install lmdb by "pip install lmdb"
 import numpy as np
 
 
@@ -70,10 +72,34 @@ def createDataset(outputPath, imagePathList, labelList, lexiconList=None, checkV
     print('Created dataset with %d samples' % nSamples)
 
 
-if __name__ == '__main__':
+def create(data_path, file, path, imagePathList, labelList, vocb=None):
+    file = os.path.join(data_path, file)
+    with open(file) as f:
+        for l in f:
+            tokens = l.split(',')
+            if len(tokens) < 2:
+                continue
+            img = tokens[0].strip()
+            txt = ''.join(tokens[1:]).strip()
+            txt = re.sub('[|]', '', txt)
+
+            path = os.path.join(data_path, path)
+            img = os.path.join(path, img) + '.jpg'
+            imagePathList.append(img)
+            labelList.append(txt)
+            if vocb is not None:
+                vocb.update(txt)
+
+
+def COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
+    data_path = '/home/xiao/Downloads/ocr_data/COCO'
+    create(data_path, 'train_words_gt.txt', 'train_words', trainImagePathList, trainLabelList, vocb)
+    create(data_path, 'val_words_gt.txt', 'val_words', valImagePathList, valLabelList)
+
+
+def Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
     data_path = '../dataset/train'
     file = os.path.join(data_path, 'gt.txt')
-    vocb = set()
     imagePathList = []
     labelList = []
     with open(file) as f:
@@ -82,7 +108,8 @@ if __name__ == '__main__':
             img = tokens[0].strip()
             img = os.path.join(data_path, img)
             txt = ''.join(tokens[1:]).strip()
-            txt = txt.replace('"', '')
+            txt = re.sub('["]', '', txt)
+
             imagePathList.append(img)
             labelList.append(txt)
             vocb.update(txt)
@@ -91,5 +118,29 @@ if __name__ == '__main__':
     vocb = sorted(vocb)
     print(''.join(vocb))
     split = 3000
-    createDataset('train', imagePathList[:split], labelList[:split])
-    createDataset('val', imagePathList[split:], labelList[split:])
+
+    trainImagePathList.extend(imagePathList[:split])
+    trainLabelList.extend(labelList[:split])
+
+    valImagePathList.extend(imagePathList[split:])
+    valLabelList.extend(labelList[split:])
+
+
+if __name__ == '__main__':
+    vocb = set()
+    trainImagePathList = []
+    trainLabelList = []
+    valImagePathList = []
+    valLabelList = []
+
+    COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    # Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+
+    print('train img: {}, label: {}'.format(len(trainImagePathList), len(trainLabelList)))
+    print('val img: {}, label: {}'.format(len(valImagePathList), len(valLabelList)))
+    vocb = ''.join(vocb)
+    vocb = sorted(vocb)
+    print('vocb {}: {}'.format(len(vocb), ''.join(vocb)))
+
+    createDataset('train', trainImagePathList, trainLabelList)
+    createDataset('val', valImagePathList, valLabelList)
