@@ -7,8 +7,7 @@ python train.py --adadelta \
 --random_sample \
 --displayInterval 10 \
 --batchSize 100 \
---nepoch 100 \
+--nepoch 200 \
 --valInterval 100 \
 --alphabet " !\"#$%&'()*+-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_\`abcdefghijklmnopqrstuvwxyz~¡¢£©®°ÇÉ•€★" \
---pretrained expr/netCRNN_24_100.pth \
 --saveInterval 100

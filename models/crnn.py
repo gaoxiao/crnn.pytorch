@@ -6,8 +6,9 @@ class BidirectionalLSTM(nn.Module):
     def __init__(self, nIn, nHidden, nOut):
         super(BidirectionalLSTM, self).__init__()
 
-        self.rnn = nn.LSTM(nIn, nHidden, bidirectional=True)
+        self.rnn = nn.LSTM(nIn, nHidden, bidirectional=True, dropout=0.2)
         self.embedding = nn.Linear(nHidden * 2, nOut)
+        self.dropout = nn.Dropout(0.5)
 
     def forward(self, input):
         # **output** of shape `(seq_len, batch, num_directions * hidden_size)`
@@ -16,6 +17,7 @@ class BidirectionalLSTM(nn.Module):
         t_rec = recurrent.view(T * b, h)
 
         output = self.embedding(t_rec)  # [T * b, nOut]
+        output = self.dropout(output)
         output = output.view(T, b, -1)
 
         return output
@@ -50,9 +52,12 @@ class CRNN(nn.Module):
         convRelu(0)
         cnn.add_module('pooling{0}'.format(0), nn.MaxPool2d(2, 2))  # 64x16x64
         convRelu(1)
+        cnn.add_module('dropout', nn.Dropout(0.2))
+
         cnn.add_module('pooling{0}'.format(1), nn.MaxPool2d(2, 2))  # 128x8x32
         convRelu(2, True)
         convRelu(3)
+        cnn.add_module('dropout', nn.Dropout(0.2))
         cnn.add_module('pooling{0}'.format(2),
                        nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 256x4x16
         convRelu(4, True)
@@ -60,6 +65,7 @@ class CRNN(nn.Module):
         cnn.add_module('pooling{0}'.format(3),
                        nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 512x2x16
         convRelu(6, True)  # 512x1x16
+        cnn.add_module('dropout', nn.Dropout(0.2))
 
         self.cnn = cnn
         self.rnn = nn.Sequential(
