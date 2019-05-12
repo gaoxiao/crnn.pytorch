@@ -96,10 +96,6 @@ def weights_init(m):
 
 crnn = crnn.CRNN(opt.imgH, nc, nclass, opt.nh)
 crnn.apply(weights_init)
-if opt.pretrained != '':
-    print('loading pretrained model from %s' % opt.pretrained)
-    crnn.load_state_dict(torch.load(opt.pretrained))
-print(crnn)
 
 image = torch.FloatTensor(opt.batchSize, 3, opt.imgH, opt.imgH)
 text = torch.IntTensor(opt.batchSize * 5)
@@ -111,9 +107,10 @@ if opt.cuda:
     image = image.cuda()
     criterion = criterion.cuda()
 
-# Load pretrained model.
-# model_path = '/home/xiao/code/crnn.pytorch/expr/netCRNN_99_40.pth'
-# crnn.load_state_dict(torch.load(model_path))
+if opt.pretrained != '':
+    print('loading pretrained model from %s' % opt.pretrained)
+    crnn.load_state_dict(torch.load(opt.pretrained))
+print(crnn)
 
 image = Variable(image)
 text = Variable(text)
@@ -160,7 +157,7 @@ def val(net, dataset, criterion, idx, max_iter=100):
 
         preds = crnn(image)
         preds_size = Variable(torch.IntTensor([preds.size(0)] * batch_size))
-        cost = criterion(preds.cpu(), text.cpu(), preds_size.cpu(), length.cpu()) / batch_size
+        cost = criterion(preds.cpu(), text, preds_size, length) / batch_size
         loss_avg.add(cost)
 
         _, preds = preds.max(2)
@@ -195,7 +192,7 @@ def trainBatch(net, criterion, optimizer):
 
     preds = crnn(image)
     preds_size = Variable(torch.IntTensor([preds.size(0)] * batch_size))
-    cost = criterion(preds.cpu(), text.cpu(), preds_size.cpu(), length.cpu()) / batch_size
+    cost = criterion(preds.cpu(), text, preds_size, length) / batch_size
     crnn.zero_grad()
     cost.backward()
     optimizer.step()
@@ -227,7 +224,8 @@ for epoch in range(opt.nepoch):
 
         # do checkpointing
         if i % opt.saveInterval == 0:
-            torch.save(
-                crnn.state_dict(), '{0}/netCRNN_{1}_{2}.pth'.format(opt.expr_dir, epoch, i))
+            model_path = '{0}/netCRNN_{1}_{2}.pth'.format(opt.expr_dir, epoch, i)
+            print('Writing model file to {}'.format(model_path))
+            torch.save(crnn.state_dict(), model_path)
 
 writer.close()

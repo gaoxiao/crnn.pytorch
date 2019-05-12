@@ -5,8 +5,9 @@ python train.py --adadelta \
 --valRoot tool/val \
 --cuda \
 --random_sample \
---displayInterval 100 \
+--displayInterval 10 \
 --batchSize 64 \
---nepoch 25 \
---valInterval 100 \
---saveInterval 200
+--nepoch 250 \
+--valInterval 10 \
+--alphabet " !\"#$%&'()*+-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_\`abcdefghijklmnopqrstuvwxyz~¡¢£©®°ÇÉ•€★" \
+--saveInterval 500

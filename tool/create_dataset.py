@@ -114,14 +114,42 @@ def Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelL
             labelList.append(txt)
             vocb.update(txt)
             # print(img, txt)
-    vocb = ''.join(vocb)
-    vocb = sorted(vocb)
-    print(''.join(vocb))
     split = 3000
-
     trainImagePathList.extend(imagePathList[:split])
     trainLabelList.extend(labelList[:split])
+    valImagePathList.extend(imagePathList[split:])
+    valLabelList.extend(labelList[split:])
 
+
+def Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
+    data_path = '/home/xiao/code/handwriting-generation'
+    gt_dir = os.path.join(data_path, 'gt')
+    img_dir = os.path.join(data_path, 'gen')
+
+    imagePathList = []
+    labelList = []
+    for gt_f in os.listdir(gt_dir):
+        gt_f = os.path.join(gt_dir, gt_f)
+        if not os.path.isfile(gt_f):
+            continue
+        with open(gt_f) as f:
+            for l in f:
+                tokens = l.split(',')
+                img = tokens[0].strip() + '.png'
+                img = os.path.join(img_dir, img)
+                txt = ''.join(tokens[1:]).strip()
+
+                if not os.path.isfile(img):
+                    print('file {} does not exist!'.format(img))
+                    continue
+
+                imagePathList.append(img)
+                labelList.append(txt)
+                vocb.update(txt)
+
+    split = 800
+    trainImagePathList.extend(imagePathList[:split])
+    trainLabelList.extend(labelList[:split])
     valImagePathList.extend(imagePathList[split:])
     valLabelList.extend(labelList[split:])
 
@@ -133,8 +161,9 @@ if __name__ == '__main__':
     valImagePathList = []
     valLabelList = []
 
-    COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    # COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
     # Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
 
     print('train img: {}, label: {}'.format(len(trainImagePathList), len(trainLabelList)))
     print('val img: {}, label: {}'.format(len(valImagePathList), len(valLabelList)))
