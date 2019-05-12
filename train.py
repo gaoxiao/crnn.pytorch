@@ -10,9 +10,9 @@ import torch
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
+from tensorboardX import SummaryWriter
 from torch.autograd import Variable
 from warpctc_pytorch import CTCLoss
-from tensorboardX import SummaryWriter
 
 import dataset
 import models.crnn as crnn
@@ -128,6 +128,8 @@ elif opt.adadelta:
 else:
     optimizer = optim.RMSprop(crnn.parameters(), lr=opt.lr)
 
+best_accuracy = 0.0
+
 
 def val(net, dataset, criterion, idx, max_iter=100):
     print('Start val')
@@ -180,6 +182,14 @@ def val(net, dataset, criterion, idx, max_iter=100):
 
     print('Test loss: %f, accuray: %f' % (loss_avg.val(), accuracy))
 
+    global best_accuracy
+    # save model
+    if best_accuracy < accuracy:
+        best_accuracy = accuracy
+        model_path = '{}/netCRNN_accu_{}.pth'.format(opt.expr_dir, best_accuracy)
+        print('At epoch {}, iter {}, writing model file to {}'.format(epoch, i, model_path))
+        torch.save(crnn.state_dict(), model_path)
+
 
 def trainBatch(net, criterion, optimizer):
     data = train_iter.next()
@@ -221,11 +231,5 @@ for epoch in range(opt.nepoch):
 
         if i % opt.valInterval == 0:
             val(crnn, test_dataset, criterion, idx)
-
-        # do checkpointing
-        if i % opt.saveInterval == 0:
-            model_path = '{0}/netCRNN_{1}_{2}.pth'.format(opt.expr_dir, epoch, i)
-            print('Writing model file to {}'.format(model_path))
-            torch.save(crnn.state_dict(), model_path)
 
 writer.close()
