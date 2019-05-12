@@ -114,7 +114,8 @@ def Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelL
             labelList.append(txt)
             vocb.update(txt)
             # print(img, txt)
-    split = 3000
+
+    split = int(len(imagePathList) * 0.8)
     trainImagePathList.extend(imagePathList[:split])
     trainLabelList.extend(labelList[:split])
     valImagePathList.extend(imagePathList[split:])
@@ -147,7 +148,7 @@ def Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLab
                 labelList.append(txt)
                 vocb.update(txt)
 
-    split = 800
+    split = int(len(imagePathList) * 0.8)
     trainImagePathList.extend(imagePathList[:split])
     trainLabelList.extend(labelList[:split])
     valImagePathList.extend(imagePathList[split:])
