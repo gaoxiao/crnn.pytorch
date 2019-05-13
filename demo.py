@@ -8,11 +8,12 @@ from PIL import Image
 import models.crnn as crnn
 
 # model_path = './data/crnn.pth'
-model_path = '/home/xiao/code/crnn.pytorch/expr/netCRNN_99_40.pth'
-img_path = './data/a.png'
+model_path = '/home/gaoxiao/code/crnn.pytorch/expr/netCRNN_accu_0.43189189189189187.pth'
+img_path = '/demo.png'
+img_path = '/home/gaoxiao/data/handwritten/gen/aa221fd4-f333-4666-99c1-c1962184b936.png'
 # img_path = '/home/xiao/code/crnn.pytorch/dataset/train/word_865.png'
 # alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
-alphabet = " !$%&'()*+-./0123456789:?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\_abcdefghijklmnopqrstuvwxyz£®Ç€"
+alphabet = " \"#$%&'()*+-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_\`abcdefghijklmnopqrstuvwxyz~¡¢£©®°ÇÉ•€★" \
 
 model = crnn.CRNN(32, 1, len(alphabet) + 1, 256)
 if torch.cuda.is_available():

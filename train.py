@@ -37,8 +37,6 @@ parser.add_argument('--alphabet', type=str,
 parser.add_argument('--expr_dir', default='expr', help='Where to store samples and models')
 parser.add_argument('--displayInterval', type=int, default=500, help='Interval to be displayed')
 parser.add_argument('--n_test_disp', type=int, default=10, help='Number of samples to display when test')
-parser.add_argument('--valInterval', type=int, default=500, help='Interval to be displayed')
-parser.add_argument('--saveInterval', type=int, default=500, help='Interval to be displayed')
 parser.add_argument('--lr', type=float, default=0.01, help='learning rate for Critic, not used by adadealta')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--adam', action='store_true', help='Whether to use adam (default is rmsprop)')
@@ -178,7 +176,7 @@ def val(net, dataset, criterion, idx, max_iter=100):
     accuracy = n_correct / float(max_iter * opt.batchSize)
 
     writer.add_scalars('data/loss', {'val': loss_avg.val()}, idx)
-    writer.add_scalar('data/val_accuracy', accuracy, idx)
+    writer.add_scalars('data/accuracy', {'val': accuracy}, idx)
 
     print('Test loss: %f, accuray: %f' % (loss_avg.val(), accuracy))
 
@@ -206,18 +204,29 @@ def trainBatch(net, criterion, optimizer):
     crnn.zero_grad()
     cost.backward()
     optimizer.step()
-    return cost
+
+    # n_correct = 0
+    # _, preds = preds.max(2)
+    # preds = preds.transpose(1, 0).contiguous().view(-1)
+    # sim_preds = converter.decode(preds.data, preds_size.data, raw=False)
+    # for pred, target in zip(sim_preds, cpu_texts):
+    #     if pred == target.lower():
+    #         n_correct += 1
+
+    return cost, n_correct
 
 
 for epoch in range(opt.nepoch):
     train_iter = iter(train_loader)
     i = 0
+    all_correct = 0
     while i < len(train_loader):
         for p in crnn.parameters():
             p.requires_grad = True
         crnn.train()
 
-        cost = trainBatch(crnn, criterion, optimizer)
+        cost, n_correct = trainBatch(crnn, criterion, optimizer)
+        all_correct += n_correct
         loss_avg.add(cost)
         i += 1
 
@@ -229,7 +238,8 @@ for epoch in range(opt.nepoch):
                   (epoch, opt.nepoch, i, len(train_loader), loss_avg.val()))
             loss_avg.reset()
 
-        if i % opt.valInterval == 0:
-            val(crnn, test_dataset, criterion, idx)
+    accuracy = all_correct / float(len(train_loader) * opt.batchSize)
+    writer.add_scalars('data/accuracy', {'train': accuracy}, epoch * len(train_loader))
+    val(crnn, test_dataset, criterion, epoch * len(train_loader))
 
 writer.close()

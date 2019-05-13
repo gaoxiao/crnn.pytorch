@@ -125,7 +125,9 @@ def Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelL
 def Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
     data_path = '/home/xiao/code/handwriting-generation'
     gt_dir = os.path.join(data_path, 'gt')
-    img_dir = os.path.join(data_path, 'gen')
+    # img_dir = os.path.join(data_path, 'gen')
+    gt_dir = '/home/gaoxiao/code/handwriting-generation/gt'
+    img_dir = '/home/gaoxiao/data/handwritten/gen'
 
     imagePathList = []
     labelList = []
@@ -148,7 +150,7 @@ def Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLab
                 labelList.append(txt)
                 vocb.update(txt)
 
-    split = int(len(imagePathList) * 0.8)
+    split = int(len(imagePathList) * 0.95)
     trainImagePathList.extend(imagePathList[:split])
     trainLabelList.extend(labelList[:split])
     valImagePathList.extend(imagePathList[split:])
