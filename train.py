@@ -40,6 +40,7 @@ parser.add_argument('--n_test_disp', type=int, default=10, help='Number of sampl
 parser.add_argument('--lr', type=float, default=0.01, help='learning rate for Critic, not used by adadealta')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--adam', action='store_true', help='Whether to use adam (default is rmsprop)')
+parser.add_argument('--train_accuracy', action='store_true', help='Whether to calculate train accurate (slow)')
 parser.add_argument('--adadelta', action='store_true', help='Whether to use adadelta (default is rmsprop)')
 parser.add_argument('--keep_ratio', action='store_true', help='whether to keep ratio for image resize')
 parser.add_argument('--manualSeed', type=int, default=1234, help='reproduce experiemnt')
@@ -47,7 +48,7 @@ parser.add_argument('--random_sample', action='store_true', help='whether to sam
 opt = parser.parse_args()
 print(opt)
 
-writer = SummaryWriter()
+writer = SummaryWriter(comment='GEN')
 
 if not os.path.exists(opt.expr_dir):
     os.makedirs(opt.expr_dir)
@@ -184,7 +185,7 @@ def val(net, dataset, criterion, idx, max_iter=100):
     # save model
     if best_accuracy < accuracy:
         best_accuracy = accuracy
-        model_path = '{}/netCRNN_accu_{}.pth'.format(opt.expr_dir, best_accuracy)
+        model_path = '{}/GEN_accu_{}.pth'.format(opt.expr_dir, best_accuracy)
         print('At epoch {}, iter {}, writing model file to {}'.format(epoch, i, model_path))
         torch.save(crnn.state_dict(), model_path)
 
@@ -205,13 +206,14 @@ def trainBatch(net, criterion, optimizer):
     cost.backward()
     optimizer.step()
 
-    # n_correct = 0
-    # _, preds = preds.max(2)
-    # preds = preds.transpose(1, 0).contiguous().view(-1)
-    # sim_preds = converter.decode(preds.data, preds_size.data, raw=False)
-    # for pred, target in zip(sim_preds, cpu_texts):
-    #     if pred == target.lower():
-    #         n_correct += 1
+    n_correct = 0
+    if opt.train_accuracy:
+        _, preds = preds.max(2)
+        preds = preds.transpose(1, 0).contiguous().view(-1)
+        sim_preds = converter.decode(preds.data, preds_size.data, raw=False)
+        for pred, target in zip(sim_preds, cpu_texts):
+            if pred == target.lower():
+                n_correct += 1
 
     return cost, n_correct
 
@@ -238,8 +240,9 @@ for epoch in range(opt.nepoch):
                   (epoch, opt.nepoch, i, len(train_loader), loss_avg.val()))
             loss_avg.reset()
 
-    accuracy = all_correct / float(len(train_loader) * opt.batchSize)
-    writer.add_scalars('data/accuracy', {'train': accuracy}, epoch * len(train_loader))
+    if opt.train_accuracy:
+        accuracy = all_correct / float(len(train_loader) * opt.batchSize)
+        writer.add_scalars('data/accuracy', {'train': accuracy}, epoch * len(train_loader))
     val(crnn, test_dataset, criterion, epoch * len(train_loader))
 
 writer.close()

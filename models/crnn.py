@@ -67,8 +67,8 @@ class CRNN(nn.Module):
 
         self.cnn = cnn
         self.rnn = nn.Sequential(
-            BidirectionalLSTM(512, nh, nh, useDropout=True),
-            BidirectionalLSTM(nh, nh, nclass))
+            BidirectionalLSTM(512, nh, nh, useDropout=False),
+            BidirectionalLSTM(nh, nh, nclass, useDropout=False))
 
     def forward(self, input):
         # conv features

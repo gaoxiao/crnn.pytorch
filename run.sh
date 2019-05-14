@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 CUDA_VISIBLE_DEVICES=0 python train.py \
---adam \
+--adadelta \
 --trainRoot tool/train \
 --valRoot tool/val \
 --cuda \
