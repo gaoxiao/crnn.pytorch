@@ -8,5 +8,6 @@ dataset/
 .idea/
 .python-version
 runs/
+old_runs/
 tool/val/
 tool/train/

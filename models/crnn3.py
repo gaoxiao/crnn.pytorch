@@ -13,8 +13,8 @@ class BidirectionalLSTM(nn.Module):
         self.rnn = WeightDrop(self.rnn, ['weight_hh_l0'], dropout=0.8)
         self.embedding = nn.Linear(nHidden * 2, nOut)
         self.dropout = nn.Dropout(0.5)
-        self.lockdrop = LockedDropout()
         self.useDropout = useDropout
+        self.lockdrop = LockedDropout()
 
     def forward(self, input):
         # **output** of shape `(seq_len, batch, num_directions * hidden_size)`
@@ -23,9 +23,11 @@ class BidirectionalLSTM(nn.Module):
         t_rec = recurrent.view(T * b, h)
 
         output = self.embedding(t_rec)  # [T * b, nOut]
+
         if self.useDropout:
             output = self.dropout(output)
         output = output.view(T, b, -1)
+        # output = self.lockdrop(output, 0.3)
 
         return output
 
@@ -75,6 +77,9 @@ class CRNN(nn.Module):
             BidirectionalLSTM(512, nh, nh, useDropout=False),
             BidirectionalLSTM(nh, nh, nclass, useDropout=False))
 
+        self.lockdrop = LockedDropout()
+
+
     def forward(self, input):
         # conv features
         conv = self.cnn(input)
@@ -83,7 +88,12 @@ class CRNN(nn.Module):
         conv = conv.squeeze(2)
         conv = conv.permute(2, 0, 1)  # [w, b, c]
 
+        conv = self.lockdrop(conv, 0.65)
+
         # rnn features
         output = self.rnn(conv)
+
+        output = self.lockdrop(output, 0.4)
+
 
         return output

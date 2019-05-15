@@ -15,7 +15,7 @@ from torch.autograd import Variable
 from warpctc_pytorch import CTCLoss
 
 import dataset
-import models.crnn as crnn
+import models.crnn4 as crnn
 import utils
 
 parser = argparse.ArgumentParser()
@@ -48,7 +48,7 @@ parser.add_argument('--random_sample', action='store_true', help='whether to sam
 opt = parser.parse_args()
 print(opt)
 
-writer = SummaryWriter(comment='GEN')
+writer = SummaryWriter(comment='_COCO_Single_LSTM_LessCNN_All_BN_DO.5')
 
 if not os.path.exists(opt.expr_dir):
     os.makedirs(opt.expr_dir)
@@ -110,6 +110,8 @@ if opt.pretrained != '':
     print('loading pretrained model from %s' % opt.pretrained)
     crnn.load_state_dict(torch.load(opt.pretrained))
 print(crnn)
+total_params = sum(p.numel() for p in crnn.parameters())
+print('Total parameter number: {}'.format(total_params))
 
 image = Variable(image)
 text = Variable(text)
@@ -172,7 +174,7 @@ def val(net, dataset, criterion, idx, max_iter=100):
     raw_preds = converter.decode(preds.data, preds_size.data, raw=True)[:opt.n_test_disp]
     for raw_pred, pred, gt in zip(raw_preds, sim_preds, cpu_texts):
         print('%-20s => %-20s, gt: %-20s' % (raw_pred, pred, gt))
-        writer.add_text('Text', '%-20s => %-20s, gt: %-20s' % (raw_pred, pred, gt), idx)
+        # writer.add_text('Text', '%-20s => %-20s, gt: %-20s' % (raw_pred, pred, gt), idx)
 
     accuracy = n_correct / float(max_iter * opt.batchSize)
 
@@ -185,9 +187,10 @@ def val(net, dataset, criterion, idx, max_iter=100):
     # save model
     if best_accuracy < accuracy:
         best_accuracy = accuracy
-        model_path = '{}/GEN_accu_{}.pth'.format(opt.expr_dir, best_accuracy)
-        print('At epoch {}, iter {}, writing model file to {}'.format(epoch, i, model_path))
-        torch.save(crnn.state_dict(), model_path)
+        if best_accuracy > 0.2:
+            model_path = '{}/COCO_accu_{}.pth'.format(opt.expr_dir, best_accuracy)
+            print('At epoch {}, iter {}, writing model file to {}'.format(epoch, i, model_path))
+            torch.save(crnn.state_dict(), model_path)
 
 
 def trainBatch(net, criterion, optimizer):

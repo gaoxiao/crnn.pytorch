@@ -92,7 +92,7 @@ def create(data_path, file, path, imagePathList, labelList, vocb=None):
 
 
 def COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
-    data_path = '/home/gaoxiao/data/coco'
+    data_path = '/home/xiao/data/ocr_data/COCO'
     create(data_path, 'train_words_gt.txt', 'train_words', trainImagePathList, trainLabelList, vocb)
     create(data_path, 'val_words_gt.txt', 'val_words', valImagePathList, valLabelList)
 
@@ -126,8 +126,8 @@ def Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLab
     data_path = '/home/gaoxiao/code/handwriting-generation'
     gt_dir = os.path.join(data_path, 'gt')
     # img_dir = os.path.join(data_path, 'gen')
-    gt_dir = '/home/gaoxiao/code/handwriting-generation/gt'
-    img_dir = '/home/gaoxiao/data/handwritten/gen'
+    gt_dir = '/home/xiao/code/handwriting-generation/gt'
+    img_dir = '/home/xiao/code/handwriting-generation/gen'
 
     imagePathList = []
     labelList = []
@@ -164,9 +164,9 @@ if __name__ == '__main__':
     valImagePathList = []
     valLabelList = []
 
-    # COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
     # Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
-    Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    # Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
 
     print('train img: {}, label: {}'.format(len(trainImagePathList), len(trainLabelList)))
     print('val img: {}, label: {}'.format(len(valImagePathList), len(valLabelList)))
