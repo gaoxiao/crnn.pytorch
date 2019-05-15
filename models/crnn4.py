@@ -68,7 +68,7 @@ class CRNN(nn.Module):
         self.cnn = cnn
         self.rnn = nn.Sequential(
             BidirectionalLSTM(512, nh, nclass, useDropout=False))
-        self.dropout = nn.Dropout(0.5)
+        self.dropout = nn.Dropout(0.8)
 
     def forward(self, input):
         # conv features

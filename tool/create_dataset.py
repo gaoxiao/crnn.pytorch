@@ -165,8 +165,8 @@ if __name__ == '__main__':
     valLabelList = []
 
     COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
-    # Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
-    # Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
 
     print('train img: {}, label: {}'.format(len(trainImagePathList), len(trainLabelList)))
     print('val img: {}, label: {}'.format(len(valImagePathList), len(valLabelList)))
