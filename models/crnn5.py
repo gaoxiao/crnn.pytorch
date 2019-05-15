@@ -1,6 +1,8 @@
 import torch.nn as nn
 
-# Single LSTM, ALL BN.
+# Single LSTM
+# Param#=6236388 before.
+# Param#=997990 (or 6236902) now.
 class BidirectionalLSTM(nn.Module):
 
     def __init__(self, nIn, nHidden, nOut, useDropout=False):
@@ -24,7 +26,7 @@ class BidirectionalLSTM(nn.Module):
 
         return output
 
-
+# Small CNN
 class CRNN(nn.Module):
 
     def __init__(self, imgH, nc, nclass, nh, n_rnn=2, leakyRelu=False):
@@ -34,7 +36,7 @@ class CRNN(nn.Module):
         ks = [3, 3, 3, 3, 3, 3, 2]  # kernel size
         ss = [1, 1, 1, 1, 1, 1, 1]  # stride size
         ps = [1, 1, 1, 1, 1, 1, 0]  # padding size
-        nm = [64, 128, 256, 256, 512, 512, 512]  # CNN channel number
+        nm = [64, 64, 64, 64, 64, 128, 128]  # CNN channel number
 
         cnn = nn.Sequential()
 
@@ -58,16 +60,16 @@ class CRNN(nn.Module):
         convRelu(2, True)
         convRelu(3, True)
         cnn.add_module('pooling{0}'.format(2),
-                       nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 256x4x16
+                       nn.MaxPool2d((2, 2), (2, 1), (0, 1)))
         convRelu(4, True)
         convRelu(5, True)
         cnn.add_module('pooling{0}'.format(3),
-                       nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 512x2x16
-        convRelu(6, True)  # 512x1x16
+                       nn.MaxPool2d((2, 2), (2, 1), (0, 1)))
+        convRelu(6, True)  # 256x1x26
 
         self.cnn = cnn
         self.rnn = nn.Sequential(
-            BidirectionalLSTM(512, nh, nclass, useDropout=False))
+            BidirectionalLSTM(128, nh, nclass, useDropout=False))
         self.dropout = nn.Dropout(0.8)
 
     def forward(self, input):

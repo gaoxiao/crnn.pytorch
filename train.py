@@ -18,6 +18,8 @@ import dataset
 import models.crnn4 as crnn
 import utils
 
+PREFIX = '_ALL'
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--trainRoot', required=True, help='path to dataset')
 parser.add_argument('--valRoot', required=True, help='path to dataset')
@@ -25,7 +27,7 @@ parser.add_argument('--workers', type=int, help='number of data loading workers'
 parser.add_argument('--batchSize', type=int, default=64, help='input batch size')
 parser.add_argument('--imgH', type=int, default=32, help='the height of the input image to network')
 parser.add_argument('--imgW', type=int, default=100, help='the width of the input image to network')
-parser.add_argument('--nh', type=int, default=256, help='size of the lstm hidden state')
+parser.add_argument('--nh', type=int, default=128, help='size of the lstm hidden state')
 parser.add_argument('--nepoch', type=int, default=25, help='number of epochs to train for')
 # TODO(meijieru): epoch -> iter
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
@@ -40,15 +42,15 @@ parser.add_argument('--n_test_disp', type=int, default=10, help='Number of sampl
 parser.add_argument('--lr', type=float, default=0.01, help='learning rate for Critic, not used by adadealta')
 parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
 parser.add_argument('--adam', action='store_true', help='Whether to use adam (default is rmsprop)')
-parser.add_argument('--train_accuracy', action='store_true', help='Whether to calculate train accurate (slow)')
 parser.add_argument('--adadelta', action='store_true', help='Whether to use adadelta (default is rmsprop)')
 parser.add_argument('--keep_ratio', action='store_true', help='whether to keep ratio for image resize')
 parser.add_argument('--manualSeed', type=int, default=1234, help='reproduce experiemnt')
 parser.add_argument('--random_sample', action='store_true', help='whether to sample the dataset with random sampler')
+parser.add_argument('--train_accuracy', action='store_true', help='Whether to calculate train accurate (slow)')
 opt = parser.parse_args()
 print(opt)
 
-writer = SummaryWriter(comment='_COCO_Single_LSTM_LessCNN_All_BN_DO.5')
+writer = SummaryWriter(comment=PREFIX)
 
 if not os.path.exists(opt.expr_dir):
     os.makedirs(opt.expr_dir)
@@ -187,8 +189,8 @@ def val(net, dataset, criterion, idx, max_iter=100):
     # save model
     if best_accuracy < accuracy:
         best_accuracy = accuracy
-        if best_accuracy > 0.2:
-            model_path = '{}/COCO_accu_{}.pth'.format(opt.expr_dir, best_accuracy)
+        if best_accuracy > 0.35:
+            model_path = '{}/{}_{}.pth'.format(opt.expr_dir, PREFIX, best_accuracy)
             print('At epoch {}, iter {}, writing model file to {}'.format(epoch, i, model_path))
             torch.save(crnn.state_dict(), model_path)
 
