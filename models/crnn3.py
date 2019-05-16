@@ -4,6 +4,7 @@ from models.locked_dropout import LockedDropout
 from models.weight_drop import WeightDrop
 
 
+# 2LSTM, AWD
 class BidirectionalLSTM(nn.Module):
 
     def __init__(self, nIn, nHidden, nOut, useDropout=False):
