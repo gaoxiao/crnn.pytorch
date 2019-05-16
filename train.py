@@ -15,10 +15,10 @@ from torch.autograd import Variable
 from warpctc_pytorch import CTCLoss
 
 import dataset
-import models.crnn4 as crnn
+import models.crnn as crnn
 import utils
 
-PREFIX = '_ALL'
+PREFIX = '_ALL_2LSTM'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trainRoot', required=True, help='path to dataset')

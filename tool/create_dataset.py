@@ -92,7 +92,7 @@ def create(data_path, file, path, imagePathList, labelList, vocb=None):
 
 
 def COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
-    data_path = '/home/xiao/data/ocr_data/COCO'
+    data_path = '/home/gaoxiao/data/coco'
     create(data_path, 'train_words_gt.txt', 'train_words', trainImagePathList, trainLabelList, vocb)
     create(data_path, 'val_words_gt.txt', 'val_words', valImagePathList, valLabelList)
 
@@ -126,29 +126,25 @@ def Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLab
     data_path = '/home/gaoxiao/code/handwriting-generation'
     gt_dir = os.path.join(data_path, 'gt')
     # img_dir = os.path.join(data_path, 'gen')
-    gt_dir = '/home/xiao/code/handwriting-generation/gt'
-    img_dir = '/home/xiao/code/handwriting-generation/gen'
+    img_dir = '/home/gaoxiao/code/handwriting-generation/gen'
+    gt_file = '/home/gaoxiao/code/handwriting-generation/gt/ALL'
 
     imagePathList = []
     labelList = []
-    for gt_f in os.listdir(gt_dir):
-        gt_f = os.path.join(gt_dir, gt_f)
-        if not os.path.isfile(gt_f):
-            continue
-        with open(gt_f) as f:
-            for l in f:
-                tokens = l.split(',')
-                img = tokens[0].strip() + '.png'
-                img = os.path.join(img_dir, img)
-                txt = ''.join(tokens[1:]).strip()
+    with open(gt_file) as f:
+        for l in f:
+            tokens = l.split(',')
+            img = tokens[0].strip() + '.png'
+            img = os.path.join(img_dir, img)
+            txt = ''.join(tokens[1:]).strip()
 
-                if not os.path.isfile(img):
-                    print('file {} does not exist!'.format(img))
-                    continue
+            if not os.path.isfile(img):
+                print('file {} does not exist!'.format(img))
+                continue
 
-                imagePathList.append(img)
-                labelList.append(txt)
-                vocb.update(txt)
+            imagePathList.append(img)
+            labelList.append(txt)
+            vocb.update(txt)
 
     split = int(len(imagePathList) * 0.95)
     trainImagePathList.extend(imagePathList[:split])
