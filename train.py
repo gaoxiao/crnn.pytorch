@@ -15,10 +15,10 @@ from torch.autograd import Variable
 from warpctc_pytorch import CTCLoss
 
 import dataset
-import models.crnn as crnn
+import models.crnn4 as crnn
 import utils
 
-PREFIX = '_ALL_2LSTM'
+PREFIX = '_ALL_1LSTM'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trainRoot', required=True, help='path to dataset')
@@ -245,12 +245,13 @@ for epoch in range(opt.nepoch):
             print('[%d/%d][%d/%d] Loss: %f' %
                   (epoch, opt.nepoch, i, len(train_loader), loss_avg.val()))
             loss_avg.reset()
+        if i % opt.valInterval == 0:
+            val(crnn, test_dataset, criterion, epoch * len(train_loader), max_iter=20)
 
     if opt.train_accuracy:
         accuracy = all_correct / float(len(train_loader) * opt.batchSize)
         writer.add_scalars('data/accuracy', {'train': accuracy}, epoch * len(train_loader))
 
-    if i % opt.valInterval == 0:
-        val(crnn, test_dataset, criterion, epoch * len(train_loader), max_iter=20)
+
 
 writer.close()
