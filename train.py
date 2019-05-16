@@ -47,6 +47,7 @@ parser.add_argument('--keep_ratio', action='store_true', help='whether to keep r
 parser.add_argument('--manualSeed', type=int, default=1234, help='reproduce experiemnt')
 parser.add_argument('--random_sample', action='store_true', help='whether to sample the dataset with random sampler')
 parser.add_argument('--train_accuracy', action='store_true', help='Whether to calculate train accurate (slow)')
+parser.add_argument('--valInterval', type=int, default=200, help='Interval to be displayed')
 opt = parser.parse_args()
 print(opt)
 
@@ -134,7 +135,7 @@ else:
 best_accuracy = 0.0
 
 
-def val(net, dataset, criterion, idx, max_iter=100):
+def val(net, dataset, criterion, idx, max_iter=20):
     print('Start val')
 
     for p in crnn.parameters():
@@ -248,6 +249,8 @@ for epoch in range(opt.nepoch):
     if opt.train_accuracy:
         accuracy = all_correct / float(len(train_loader) * opt.batchSize)
         writer.add_scalars('data/accuracy', {'train': accuracy}, epoch * len(train_loader))
-    val(crnn, test_dataset, criterion, epoch * len(train_loader))
+
+    if i % opt.valInterval == 0:
+        val(crnn, test_dataset, criterion, epoch * len(train_loader), max_iter=20)
 
 writer.close()
