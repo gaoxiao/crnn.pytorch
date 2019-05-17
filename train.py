@@ -18,7 +18,7 @@ import dataset
 import models.crnn4 as crnn
 import utils
 
-PREFIX = '_ALL_1LSTM'
+PREFIX = '_IAM&COCO_1LSTM'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trainRoot', required=True, help='path to dataset')

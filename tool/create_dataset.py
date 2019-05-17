@@ -4,6 +4,9 @@ import re
 import cv2
 import lmdb  # install lmdb by "pip install lmdb"
 import numpy as np
+from pathlib import Path
+
+home = str(Path.home())
 
 
 def checkImageIsValid(imageBin):
@@ -92,7 +95,7 @@ def create(data_path, file, path, imagePathList, labelList, vocb=None):
 
 
 def COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
-    data_path = '/home/gaoxiao/data/coco'
+    data_path = os.path.join(home, 'data/ocr_data/coco')
     create(data_path, 'train_words_gt.txt', 'train_words', trainImagePathList, trainLabelList, vocb)
     create(data_path, 'val_words_gt.txt', 'val_words', valImagePathList, valLabelList)
 
@@ -153,6 +156,47 @@ def Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLab
     valLabelList.extend(labelList[split:])
 
 
+def IAM(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
+    data_path = os.path.join(home, 'data/ocr_data/IAM')
+    # img_dir = os.path.join(data_path, 'gen')
+    img_dir = os.path.join(data_path, 'word')
+    gt_file = os.path.join(data_path, 'words.txt')
+
+    imagePathList = []
+    labelList = []
+    with open(gt_file) as f:
+        for line in f:
+            # ignore comment line
+            if not line or line[0] == '#':
+                continue
+
+            line_split = line.strip().split(' ')
+            assert len(line_split) >= 9
+
+            # filename: part1-part2-part3 --> part1/part1-part2/part1-part2-part3.png
+            file_name_split = line_split[0].split('-')
+            img = '{}/{}-{}/{}.png'.format(file_name_split[0], file_name_split[0], file_name_split[1], line_split[0])
+            img = os.path.join(img_dir, img)
+
+            # GT text are columns starting at 9
+            txt = ' '.join(line_split[8:])
+
+            # check if image is not empty
+            if not os.path.getsize(img):
+                print('not found img file: {}'.format(img))
+                continue
+
+            imagePathList.append(img)
+            labelList.append(txt)
+            vocb.update(txt)
+
+    split = int(len(imagePathList) * 0.95)
+    trainImagePathList.extend(imagePathList[:split])
+    trainLabelList.extend(labelList[:split])
+    valImagePathList.extend(imagePathList[split:])
+    valLabelList.extend(labelList[split:])
+
+
 if __name__ == '__main__':
     vocb = set()
     trainImagePathList = []
@@ -161,8 +205,9 @@ if __name__ == '__main__':
     valLabelList = []
 
     COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
-    Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
-    Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    # Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    # Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    IAM(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
 
     print('train img: {}, label: {}'.format(len(trainImagePathList), len(trainLabelList)))
     print('val img: {}, label: {}'.format(len(valImagePathList), len(valLabelList)))
