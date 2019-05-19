@@ -12,15 +12,17 @@ import torch.optim as optim
 import torch.utils.data
 from tensorboardX import SummaryWriter
 from torch.autograd import Variable
+from torchvision.transforms import transforms
 from warpctc_pytorch import CTCLoss
 
 import dataset
-import models.crnn4 as crnn
+import models.crnn2 as crnn
 import utils
 
-PREFIX = '_IAM&COCO_1LSTM'
+import Augmentor
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--trainName', required=True, help='Train name')
 parser.add_argument('--trainRoot', required=True, help='path to dataset')
 parser.add_argument('--valRoot', required=True, help='path to dataset')
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=2)
@@ -33,9 +35,7 @@ parser.add_argument('--nepoch', type=int, default=25, help='number of epochs to 
 parser.add_argument('--cuda', action='store_true', help='enables cuda')
 parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
 parser.add_argument('--pretrained', default='', help="path to pretrained model (to continue training)")
-# parser.add_argument('--alphabet', type=str, default='0123456789abcdefghijklmnopqrstuvwxyz')
-parser.add_argument('--alphabet', type=str,
-                    default=" !\"#$%&'()*+-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_`abcdefghijklmnopqrstuvwxyz~¡¢£©°É•€★")
+parser.add_argument('--alphabet', type=str, default="0123456789abcdefghijklmnopqrstuvwxyz")
 parser.add_argument('--expr_dir', default='expr', help='Where to store samples and models')
 parser.add_argument('--displayInterval', type=int, default=500, help='Interval to be displayed')
 parser.add_argument('--n_test_disp', type=int, default=10, help='Number of samples to display when test')
@@ -51,6 +51,7 @@ parser.add_argument('--valInterval', type=int, default=200, help='Interval to be
 opt = parser.parse_args()
 print(opt)
 
+PREFIX = '_{}'.format(opt.trainName)
 writer = SummaryWriter(comment=PREFIX)
 
 if not os.path.exists(opt.expr_dir):
@@ -65,7 +66,18 @@ cudnn.benchmark = True
 if torch.cuda.is_available() and not opt.cuda:
     print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-train_dataset = dataset.lmdbDataset(root=opt.trainRoot)
+# transform_train = transforms.Compose([
+#     transforms.RandomCrop((opt.imgW - 2, opt.imgH - 2), padding=2),
+# ])
+
+p = Augmentor.Pipeline()
+p.gaussian_distortion(probability=0.4, grid_width=7, grid_height=6
+                      , magnitude=6, corner="ul", method="in", mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
+transform_train = transforms.Compose([
+    p.torch_transform()
+])
+
+train_dataset = dataset.lmdbDataset(root=opt.trainRoot, transform=transform_train)
 assert train_dataset
 if not opt.random_sample:
     sampler = dataset.randomSequentialSampler(train_dataset, opt.batchSize)
@@ -251,7 +263,5 @@ for epoch in range(opt.nepoch):
     if opt.train_accuracy:
         accuracy = all_correct / float(len(train_loader) * opt.batchSize)
         writer.add_scalars('data/accuracy', {'train': accuracy}, epoch * len(train_loader))
-
-
 
 writer.close()

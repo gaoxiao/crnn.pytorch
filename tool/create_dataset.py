@@ -126,14 +126,12 @@ def Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelL
 
 
 def Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
-    data_path = '/home/gaoxiao/code/handwriting-generation'
-    gt_dir = os.path.join(data_path, 'gt')
-    # img_dir = os.path.join(data_path, 'gen')
-    img_dir = '/home/gaoxiao/code/handwriting-generation/gen'
-    gt_file = '/home/gaoxiao/code/handwriting-generation/gt/ALL'
+    data_path = os.path.join(home, 'code/handwriting-generation')
+    gt_file = os.path.join(data_path, 'gt/ALL')
+    img_dir = os.path.join(data_path, 'gen')
 
-    imagePathList = []
-    labelList = []
+    image_path_list = []
+    label_list = []
     with open(gt_file) as f:
         for l in f:
             tokens = l.split(',')
@@ -145,15 +143,21 @@ def Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLab
                 print('file {} does not exist!'.format(img))
                 continue
 
-            imagePathList.append(img)
-            labelList.append(txt)
+            image_path_list.append(img)
+            label_list.append(txt)
             vocb.update(txt)
 
-    split = int(len(imagePathList) * 0.95)
-    trainImagePathList.extend(imagePathList[:split])
-    trainLabelList.extend(labelList[:split])
-    valImagePathList.extend(imagePathList[split:])
-    valLabelList.extend(labelList[split:])
+            if len(image_path_list) > 50000:
+                break
+
+    trainImagePathList.extend(image_path_list)
+    trainLabelList.extend(label_list)
+
+    # split = int(len(imagePathList) * 0.95)
+    # trainImagePathList.extend(imagePathList[:split])
+    # trainLabelList.extend(labelList[:split])
+    # valImagePathList.extend(imagePathList[split:])
+    # valLabelList.extend(labelList[split:])
 
 
 def IAM(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
@@ -190,7 +194,7 @@ def IAM(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb
             labelList.append(txt)
             vocb.update(txt)
 
-    split = int(len(imagePathList) * 0.95)
+    split = int(len(imagePathList) * 0.9)
     trainImagePathList.extend(imagePathList[:split])
     trainLabelList.extend(labelList[:split])
     valImagePathList.extend(imagePathList[split:])
@@ -204,7 +208,7 @@ if __name__ == '__main__':
     valImagePathList = []
     valLabelList = []
 
-    COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    # COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
     # Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
     # Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
     IAM(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)

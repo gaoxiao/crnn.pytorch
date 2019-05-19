@@ -9,4 +9,7 @@ CUDA_VISIBLE_DEVICES=2 python train.py \
 --displayInterval 10 \
 --batchSize 400 \
 --alphabet " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_\`abcdefghijklmnopqrstuvwxyz~¡¢£©®°ÇÉ•€★" \
---nepoch 200
+--nepoch 200 \
+--nh 256 \
+--imgW 70 \
+--trainName "IAM_2LSTM_nh256_imgw70"

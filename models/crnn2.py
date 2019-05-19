@@ -1,19 +1,14 @@
 import torch.nn as nn
 
-from models.locked_dropout import LockedDropout
-from models.weight_drop import WeightDrop
-
-
+# 2LSTM, ALL BN.
 class BidirectionalLSTM(nn.Module):
 
     def __init__(self, nIn, nHidden, nOut, useDropout=False):
         super(BidirectionalLSTM, self).__init__()
 
         self.rnn = nn.LSTM(nIn, nHidden, bidirectional=True)
-        self.rnn = WeightDrop(self.rnn, ['weight_hh_l0'], dropout=0.8)
         self.embedding = nn.Linear(nHidden * 2, nOut)
         self.dropout = nn.Dropout(0.5)
-        self.lockdrop = LockedDropout()
         self.useDropout = useDropout
 
     def forward(self, input):
@@ -56,16 +51,16 @@ class CRNN(nn.Module):
             else:
                 cnn.add_module('relu{0}'.format(i), nn.ReLU(True))
 
-        convRelu(0)
+        convRelu(0, True)
         cnn.add_module('pooling{0}'.format(0), nn.MaxPool2d(2, 2))  # 64x16x64
-        convRelu(1)
+        convRelu(1, True)
         cnn.add_module('pooling{0}'.format(1), nn.MaxPool2d(2, 2))  # 128x8x32
         convRelu(2, True)
-        convRelu(3)
+        convRelu(3, True)
         cnn.add_module('pooling{0}'.format(2),
                        nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 256x4x16
         convRelu(4, True)
-        convRelu(5)
+        convRelu(5, True)
         cnn.add_module('pooling{0}'.format(3),
                        nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 512x2x16
         convRelu(6, True)  # 512x1x16
@@ -74,6 +69,7 @@ class CRNN(nn.Module):
         self.rnn = nn.Sequential(
             BidirectionalLSTM(512, nh, nh, useDropout=False),
             BidirectionalLSTM(nh, nh, nclass, useDropout=False))
+        self.dropout = nn.Dropout(0.8)
 
     def forward(self, input):
         # conv features
@@ -82,6 +78,8 @@ class CRNN(nn.Module):
         assert h == 1, "the height of conv must be 1"
         conv = conv.squeeze(2)
         conv = conv.permute(2, 0, 1)  # [w, b, c]
+
+        conv = self.dropout(conv)
 
         # rnn features
         output = self.rnn(conv)
