@@ -2,6 +2,8 @@
 # encoding: utf-8
 
 import random
+
+import Augmentor
 import torch
 from torch.utils.data import Dataset
 from torch.utils.data import sampler
@@ -71,15 +73,23 @@ class lmdbDataset(Dataset):
 
 
 class resizeNormalize(object):
-
     def __init__(self, size, interpolation=Image.BILINEAR):
         self.size = size
         self.interpolation = interpolation
-        self.toTensor = transforms.ToTensor()
+        # self.toTensor = transforms.ToTensor()
+        p = Augmentor.Pipeline()
+        # p.gaussian_distortion(probability=0.4, grid_width=3, grid_height=3
+        #                       , magnitude=6, corner="ul", method="in", mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
+        p.random_distortion(probability=1, grid_width=4, grid_height=4, magnitude=8)
+        self.transform_train = transforms.Compose([
+            p.torch_transform(),
+            transforms.ToTensor(),
+        ])
+
 
     def __call__(self, img):
         img = img.resize(self.size, self.interpolation)
-        img = self.toTensor(img)
+        img = self.transform_train(img)
         img.sub_(0.5).div_(0.5)
         return img
 

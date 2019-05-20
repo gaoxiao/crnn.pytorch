@@ -11,3 +11,4 @@ torch==1.0.1.post2
 torchvision==0.2.2.post3
 tensorboardX==1.6
 # warpctc-pytorch==0.1
+Augmentor==0.2.3

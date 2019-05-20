@@ -66,18 +66,7 @@ cudnn.benchmark = True
 if torch.cuda.is_available() and not opt.cuda:
     print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-# transform_train = transforms.Compose([
-#     transforms.RandomCrop((opt.imgW - 2, opt.imgH - 2), padding=2),
-# ])
-
-p = Augmentor.Pipeline()
-p.gaussian_distortion(probability=0.4, grid_width=7, grid_height=6
-                      , magnitude=6, corner="ul", method="in", mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
-transform_train = transforms.Compose([
-    p.torch_transform()
-])
-
-train_dataset = dataset.lmdbDataset(root=opt.trainRoot, transform=transform_train)
+train_dataset = dataset.lmdbDataset(root=opt.trainRoot)
 assert train_dataset
 if not opt.random_sample:
     sampler = dataset.randomSequentialSampler(train_dataset, opt.batchSize)
