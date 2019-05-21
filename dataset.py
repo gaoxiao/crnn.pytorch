@@ -73,19 +73,25 @@ class lmdbDataset(Dataset):
 
 
 class resizeNormalize(object):
-    def __init__(self, size, interpolation=Image.BILINEAR):
+    def __init__(self, size, interpolation=Image.BILINEAR, augmentation=True):
         self.size = size
         self.interpolation = interpolation
         # self.toTensor = transforms.ToTensor()
-        p = Augmentor.Pipeline()
-        # p.gaussian_distortion(probability=0.4, grid_width=3, grid_height=3
-        #                       , magnitude=6, corner="ul", method="in", mex=0.5, mey=0.5, sdx=0.05, sdy=0.05)
-        p.random_distortion(probability=1, grid_width=4, grid_height=4, magnitude=8)
-        self.transform_train = transforms.Compose([
-            p.torch_transform(),
-            transforms.ToTensor(),
-        ])
 
+        if augmentation:
+            p = Augmentor.Pipeline()
+            p.random_distortion(probability=0.5, grid_width=4, grid_height=4, magnitude=8)
+            # p.random_erasing(probability=0.5, rectangle_area=0.5)
+            # p.shear(probability=0.5, max_shear_left=10, max_shear_right=10)
+            # p.skew_tilt(probability=0.5, magnitude=0.5)
+            self.transform_train = transforms.Compose([
+                p.torch_transform(),
+                transforms.ToTensor(),
+            ])
+        else:
+            self.transform_train = transforms.Compose([
+                transforms.ToTensor(),
+            ])
 
     def __call__(self, img):
         img = img.resize(self.size, self.interpolation)

@@ -12,14 +12,11 @@ import torch.optim as optim
 import torch.utils.data
 from tensorboardX import SummaryWriter
 from torch.autograd import Variable
-from torchvision.transforms import transforms
 from warpctc_pytorch import CTCLoss
 
 import dataset
 import models.crnn2 as crnn
 import utils
-
-import Augmentor
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trainName', required=True, help='Train name')
@@ -51,11 +48,12 @@ parser.add_argument('--valInterval', type=int, default=200, help='Interval to be
 opt = parser.parse_args()
 print(opt)
 
-PREFIX = '_{}'.format(opt.trainName)
-writer = SummaryWriter(comment=PREFIX)
+PREFIX = opt.trainName
+writer = SummaryWriter(log_dir=os.path.join('runs', PREFIX))
 
-if not os.path.exists(opt.expr_dir):
-    os.makedirs(opt.expr_dir)
+model_dir = os.path.join(opt.expr_dir, PREFIX)
+if not os.path.exists(model_dir):
+    os.makedirs(model_dir)
 
 random.seed(opt.manualSeed)
 np.random.seed(opt.manualSeed)
@@ -192,7 +190,7 @@ def val(net, dataset, criterion, idx, max_iter=20):
     if best_accuracy < accuracy:
         best_accuracy = accuracy
         if best_accuracy > 0.35:
-            model_path = '{}/{}_{}.pth'.format(opt.expr_dir, PREFIX, best_accuracy)
+            model_path = os.path.join(model_dir, '{:.5f}.pth'.format(best_accuracy))
             print('At epoch {}, iter {}, writing model file to {}'.format(epoch, i, model_path))
             torch.save(crnn.state_dict(), model_path)
 
