@@ -60,6 +60,8 @@ class CRNN(nn.Module):
         cnn.add_module('pooling{0}'.format(2),
                        nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 256x4x16
         convRelu(4, True)
+        # cnn.add_module('pooling{0}'.format(2222),
+        #                nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 256x4x16
         convRelu(5, True)
         cnn.add_module('pooling{0}'.format(3),
                        nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 512x2x16

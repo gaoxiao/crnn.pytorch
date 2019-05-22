@@ -7,6 +7,7 @@ CUDA_VISIBLE_DEVICES=1 python train.py \
 --cuda \
 --random_sample \
 --displayInterval 10 \
+--valInterval 20 \
 --batchSize 400 \
 --alphabet " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_\`abcdefghijklmnopqrstuvwxyz~¡¢£©®°ÇÉ•€★" \
 --nepoch 200 \

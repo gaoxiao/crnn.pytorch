@@ -19,7 +19,7 @@ if not os.path.isdir(gt_dir):
 # record_file = '{}/{}.txt'.format(gt_dir, uuid.uuid4())
 record_file = '{}/{}.txt'.format(gt_dir, 'ALL')
 
-zoom_factor = 2
+zoom_factor = 1
 
 
 def random_bg_color():
@@ -34,11 +34,16 @@ def random_fg_color():
 
 def get_fonts():
     fonts = []
-    for f in os.listdir(font_dir):
-        if f.endswith('ttf'):
-            path = os.path.join(font_dir, f)
-            font = ImageFont.truetype(path, size=12 * zoom_factor)
-            fonts.append(font)
+
+    path = os.path.join(font_dir, 'Schoolbell.ttf')
+    font = ImageFont.truetype(path, size=18 * zoom_factor)
+    fonts.append(font)
+
+    # for f in os.listdir(font_dir):
+    #     if f.endswith('ttf'):
+    #         path = os.path.join(font_dir, f)
+    #         font = ImageFont.truetype(path, size=18 * zoom_factor)
+    #         fonts.append(font)
     return fonts
 
 
@@ -60,7 +65,7 @@ def main():
 
     fonts = get_fonts()
 
-    size = 10000
+    size = 100000
     record = []
 
     for idx in tqdm(range(size)):
@@ -69,10 +74,12 @@ def main():
         draw = ImageDraw.Draw(image)
         font = random.choice(fonts)
 
-        w1, w2 = random.choice(words), random.choice(words)
-        text = '{} {}'.format(w1, w2)
+        # w1, w2 = random.choice(words), random.choice(words)
+        # text = '{} {}'.format(w1, w2)
 
-        draw.text((10, 10), text, fill=random_fg_color(), font=font)
+        text = random.choice(words)
+
+        draw.text((5, 5), text, fill=random_fg_color(), font=font)
         # draw.text((11, 11), text, fill=random_fg_color(), font=font)
         # draw.text((12, 12), text, fill=random_fg_color(), font=font)
         image.save('{}/{}.png'.format(data_dir, id_))
