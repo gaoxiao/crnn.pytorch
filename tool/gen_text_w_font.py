@@ -16,7 +16,10 @@ if not os.path.isdir(data_dir):
 if not os.path.isdir(gt_dir):
     os.makedirs(gt_dir)
 
-record_file = '{}/{}.txt'.format(gt_dir, uuid.uuid4())
+# record_file = '{}/{}.txt'.format(gt_dir, uuid.uuid4())
+record_file = '{}/{}.txt'.format(gt_dir, 'ALL')
+
+zoom_factor = 2
 
 
 def random_bg_color():
@@ -34,7 +37,7 @@ def get_fonts():
     for f in os.listdir(font_dir):
         if f.endswith('ttf'):
             path = os.path.join(font_dir, f)
-            font = ImageFont.truetype(path, size=25)
+            font = ImageFont.truetype(path, size=12 * zoom_factor)
             fonts.append(font)
     return fonts
 
@@ -57,12 +60,12 @@ def main():
 
     fonts = get_fonts()
 
-    size = 50000
+    size = 10000
     record = []
 
     for idx in tqdm(range(size)):
         id_ = uuid.uuid4()
-        image = Image.new("RGB", (250, 60), random_bg_color())
+        image = Image.new("RGB", (100 * zoom_factor, 32 * zoom_factor), random_bg_color())
         draw = ImageDraw.Draw(image)
         font = random.choice(fonts)
 
@@ -70,6 +73,8 @@ def main():
         text = '{} {}'.format(w1, w2)
 
         draw.text((10, 10), text, fill=random_fg_color(), font=font)
+        # draw.text((11, 11), text, fill=random_fg_color(), font=font)
+        # draw.text((12, 12), text, fill=random_fg_color(), font=font)
         image.save('{}/{}.png'.format(data_dir, id_))
         record.append((id_, text))
 
