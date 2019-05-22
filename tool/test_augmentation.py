@@ -2,17 +2,13 @@ import argparse
 
 import Augmentor
 from PIL import Image
-from torchvision.transforms import transforms
-
-from torchvision.transforms import functional as F
-
-import dataset
 from matplotlib import pyplot as plt
+from torchvision.transforms import transforms
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--imgH', type=int, default=32, help='the height of the input image to network')
 parser.add_argument('--imgW', type=int, default=100, help='the width of the input image to network')
-parser.add_argument('--img_path', type=str, default='/home/gaoxiao/Pictures/a.png')
+parser.add_argument('--img_path', type=str, default='/home/xiao/Pictures/a.png')
 
 opt = parser.parse_args()
 
@@ -61,6 +57,14 @@ plt.show()
 # plt.show()
 
 
-transform_train = transforms.Compose([lambda img: F.adjust_contrast(img, 5)])
+p = Augmentor.Pipeline()
+p.invert(probability=0.5)
+p.random_color(1, 0, 1)
+p.random_contrast(1, 0, 1)
+p.random_brightness(1, 0, 1)
+transform_train = transforms.Compose([
+    # lambda img: F.adjust_contrast(img, 5),
+    p.torch_transform(),
+])
 plt.imshow(transform_train(image), cmap='gray')
 plt.show()

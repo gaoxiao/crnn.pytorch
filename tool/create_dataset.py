@@ -201,6 +201,35 @@ def IAM(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb
     valLabelList.extend(labelList[split:])
 
 
+def Gen_Font(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
+    data_path = os.path.join(home, 'data/ocr_data/font_gen')
+    gt_file = os.path.join(data_path, 'gt/ALL.txt')
+    img_dir = os.path.join(data_path, 'img')
+
+    image_path_list = []
+    label_list = []
+    with open(gt_file) as f:
+        for l in f:
+            tokens = l.split(',')
+            img = tokens[0].strip() + '.png'
+            img = os.path.join(img_dir, img)
+            txt = ''.join(tokens[1:]).strip()
+
+            if not os.path.isfile(img):
+                print('file {} does not exist!'.format(img))
+                continue
+
+            image_path_list.append(img)
+            label_list.append(txt)
+            vocb.update(txt)
+
+    split = int(len(image_path_list) * 0.95)
+    trainImagePathList.extend(image_path_list[:split])
+    trainLabelList.extend(label_list[:split])
+    valImagePathList.extend(image_path_list[split:])
+    valLabelList.extend(label_list[split:])
+
+
 if __name__ == '__main__':
     vocb = set()
     trainImagePathList = []
@@ -211,7 +240,8 @@ if __name__ == '__main__':
     # COCO(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
     # Born_Digital(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
     # Gen_Handwritten(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
-    IAM(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    # IAM(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
+    Gen_Font(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb)
 
     print('train img: {}, label: {}'.format(len(trainImagePathList), len(trainLabelList)))
     print('val img: {}, label: {}'.format(len(valImagePathList), len(valLabelList)))
@@ -219,5 +249,5 @@ if __name__ == '__main__':
     vocb = sorted(vocb)
     print('vocb {}: {}'.format(len(vocb), ''.join(vocb)))
 
-    createDataset('train', trainImagePathList, trainLabelList)
-    createDataset('val', valImagePathList, valLabelList)
+    createDataset('train1', trainImagePathList, trainLabelList)
+    createDataset('val1', valImagePathList, valLabelList)

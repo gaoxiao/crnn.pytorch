@@ -1,3 +1,4 @@
+matplotlib
 blessings==1.7
 gpustat==0.5.0
 lmdb==0.94

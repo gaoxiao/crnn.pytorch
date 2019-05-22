@@ -2,13 +2,13 @@
 
 CUDA_VISIBLE_DEVICES=1 python train.py \
 --adadelta \
---trainRoot tool/train \
---valRoot tool/val \
+--trainRoot tool/train1 \
+--valRoot tool/val1 \
 --cuda \
 --random_sample \
 --displayInterval 10 \
 --batchSize 400 \
 --alphabet " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_\`abcdefghijklmnopqrstuvwxyz~¡¢£©®°ÇÉ•€★" \
 --nepoch 200 \
---nh 256 \
---trainName "IAM_2LSTM_dist_erase_shear"
+--nh 512 \
+--trainName "Font"
