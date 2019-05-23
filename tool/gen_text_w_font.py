@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 import uuid
 from pathlib import Path
 
@@ -11,6 +12,10 @@ home = str(Path.home())
 data_dir = os.path.join(home, 'data/ocr_data/font_gen/img')
 gt_dir = os.path.join(home, 'data/ocr_data/font_gen/gt')
 font_dir = os.path.join(home, 'data/fonts/')
+
+shutil.rmtree(data_dir, ignore_errors=True)
+shutil.rmtree(gt_dir, ignore_errors=True)
+
 if not os.path.isdir(data_dir):
     os.makedirs(data_dir)
 if not os.path.isdir(gt_dir):
@@ -35,15 +40,51 @@ def random_fg_color():
 def get_fonts():
     fonts = []
 
+    path = os.path.join(font_dir, 'Almost Cartoon.ttf')
+    font = ImageFont.truetype(path, size=18 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'AckiPreschool.ttf')
+    font = ImageFont.truetype(path, size=18 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'BPchildfatty.ttf')
+    font = ImageFont.truetype(path, size=18 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'Children.ttf')
+    font = ImageFont.truetype(path, size=16 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'Children Sans.ttf')
+    font = ImageFont.truetype(path, size=16 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'Childrens Party Personal Use.ttf')
+    font = ImageFont.truetype(path, size=18 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'ComingSoon.ttf')
+    font = ImageFont.truetype(path, size=18 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'doves.ttf')
+    font = ImageFont.truetype(path, size=18 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'elizajane.ttf')
+    font = ImageFont.truetype(path, size=12 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'Gruenewald VA normal.ttf')
+    font = ImageFont.truetype(path, size=18 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'KatetheGreat.ttf')
+    font = ImageFont.truetype(path, size=14 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'Kindergarden.ttf')
+    font = ImageFont.truetype(path, size=14 * zoom_factor)
+    fonts.append(font)
+    path = os.path.join(font_dir, 'PizzaismyFAVORITE.ttf')
+    font = ImageFont.truetype(path, size=14 * zoom_factor)
+    fonts.append(font)
     path = os.path.join(font_dir, 'Schoolbell.ttf')
     font = ImageFont.truetype(path, size=18 * zoom_factor)
     fonts.append(font)
-
-    # for f in os.listdir(font_dir):
-    #     if f.endswith('ttf'):
-    #         path = os.path.join(font_dir, f)
-    #         font = ImageFont.truetype(path, size=18 * zoom_factor)
-    #         fonts.append(font)
+    path = os.path.join(font_dir, 'Tafelschrift.ttf')
+    font = ImageFont.truetype(path, size=14 * zoom_factor)
+    fonts.append(font)
     return fonts
 
 
