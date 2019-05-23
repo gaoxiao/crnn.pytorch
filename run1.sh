@@ -2,8 +2,8 @@
 
 CUDA_VISIBLE_DEVICES=1 python train.py \
 --adadelta \
---trainRoot tool/train1 \
---valRoot tool/val1 \
+--trainRoot tool/train3 \
+--valRoot tool/val \
 --cuda \
 --random_sample \
 --displayInterval 10 \
@@ -12,6 +12,6 @@ CUDA_VISIBLE_DEVICES=1 python train.py \
 --alphabet " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_\`abcdefghijklmnopqrstuvwxyz~¡¢£©®°ÇÉ•€★" \
 --nepoch 200 \
 --nh 512 \
---pretrained "/home/gaoxiao/code/crnn.pytorch/expr/IAM&AllFont_finetune_IAMval/0.82463.pth" \
+--pretrained "/home/xiao/code/crnn.pytorch/expr/Font/0.96115.pth" \
 --use_aug \
---trainName "IAM&AllFont_finetune_IAMval_aug"
+--trainName "IAM_Font_tune_IAMval_aug"
