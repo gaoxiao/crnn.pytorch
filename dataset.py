@@ -76,32 +76,30 @@ class lmdbDataset(Dataset):
 
 
 class resizeNormalize(object):
-    def __init__(self, size, interpolation=Image.BILINEAR, augmentation=True):
+    def __init__(self, size, interpolation=Image.BILINEAR, augmentation=False, noise=False):
         self.size = size
         self.interpolation = interpolation
-        # self.toTensor = transforms.ToTensor()
+
+        trans = []
+
+        if noise:
+            trans.append(lambda img: noisy(img))
 
         if augmentation:
             p = Augmentor.Pipeline()
             p.invert(probability=0.5)
-            # p.random_color(1, 0, 1)
-            # p.random_contrast(1, 0, 1)
-            # p.random_brightness(1, 0, 1)
-            # p.random_distortion(probability=0.5, grid_width=4, grid_height=4, magnitude=8)
+            p.random_color(1, 0, 1)
+            p.random_contrast(1, 0, 1)
+            p.random_brightness(1, 0, 1)
+            p.random_distortion(probability=0.5, grid_width=4, grid_height=4, magnitude=8)
 
             # p.random_erasing(probability=0.5, rectangle_area=0.5)
             # p.shear(probability=0.5, max_shear_left=10, max_shear_right=10)
             # p.skew_tilt(probability=0.5, magnitude=0.5)
+            trans.append(p.torch_transform())
 
-            self.transform_train = transforms.Compose([
-                lambda img: noisy(img),
-                p.torch_transform(),
-                transforms.ToTensor(),
-            ])
-        else:
-            self.transform_train = transforms.Compose([
-                transforms.ToTensor(),
-            ])
+        trans.append(transforms.ToTensor())
+        self.transform_train = transforms.Compose(trans)
 
     def __call__(self, img):
         img = img.resize(self.size, self.interpolation)
@@ -138,11 +136,13 @@ class randomSequentialSampler(sampler.Sampler):
 
 class alignCollate(object):
 
-    def __init__(self, imgH=32, imgW=100, keep_ratio=False, min_ratio=1):
+    def __init__(self, imgH=32, imgW=100, keep_ratio=False, min_ratio=1, augmentation=False, noise=False):
         self.imgH = imgH
         self.imgW = imgW
         self.keep_ratio = keep_ratio
         self.min_ratio = min_ratio
+        self.augmentation = augmentation
+        self.noise = noise
 
     def __call__(self, batch):
         images, labels = zip(*batch)
@@ -159,7 +159,7 @@ class alignCollate(object):
             imgW = int(np.floor(max_ratio * imgH))
             imgW = max(imgH * self.min_ratio, imgW)  # assure imgH >= imgW
 
-        transform = resizeNormalize((imgW, imgH))
+        transform = resizeNormalize((imgW, imgH), augmentation=self.augmentation, noise=self.noise)
         images = [transform(image) for image in images]
         images = torch.cat([t.unsqueeze(0) for t in images], 0)
 

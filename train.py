@@ -45,6 +45,7 @@ parser.add_argument('--manualSeed', type=int, default=1234, help='reproduce expe
 parser.add_argument('--random_sample', action='store_true', help='whether to sample the dataset with random sampler')
 parser.add_argument('--train_accuracy', action='store_true', help='Whether to calculate train accurate (slow)')
 parser.add_argument('--use_aug', action='store_true', help='Use augmentation')
+parser.add_argument('--use_noise', action='store_true', help='Use noise')
 parser.add_argument('--valInterval', type=int, default=40, help='Interval to be displayed')
 opt = parser.parse_args()
 print(opt)
@@ -75,9 +76,10 @@ train_loader = torch.utils.data.DataLoader(
     train_dataset, batch_size=opt.batchSize,
     shuffle=True, sampler=sampler,
     num_workers=int(opt.workers),
-    collate_fn=dataset.alignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio=opt.keep_ratio))
+    collate_fn=dataset.alignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio=opt.keep_ratio, augmentation=opt.use_aug,
+                                    noise=opt.use_noise))
 test_dataset = dataset.lmdbDataset(
-    root=opt.valRoot, transform=dataset.resizeNormalize((opt.imgW, opt.imgH), augmentation=opt.use_aug))
+    root=opt.valRoot, transform=dataset.resizeNormalize((opt.imgW, opt.imgH), augmentation=False, noise=False))
 
 nclass = len(opt.alphabet) + 1
 nc = 1

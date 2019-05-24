@@ -49,7 +49,7 @@ model.load_state_dict(new_state_dict)
 
 converter = utils.strLabelConverter(alphabet)
 
-transformer = dataset.resizeNormalize((100, 32), augmentation=False)
+transformer = dataset.resizeNormalize((100, 32), augmentation=False, noise=False)
 image = Image.open(img_path)
 print(image.format, image.size, image.mode)
 im2arr = np.array(image)

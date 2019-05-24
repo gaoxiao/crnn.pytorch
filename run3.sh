@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-CUDA_VISIBLE_DEVICES=3 python train.py \
+CUDA_VISIBLE_DEVICES=2 python train.py \
 --adadelta \
---trainRoot tool/train \
+--trainRoot tool/train1 \
 --valRoot tool/val \
 --cuda \
 --random_sample \
@@ -12,5 +12,7 @@ CUDA_VISIBLE_DEVICES=3 python train.py \
 --alphabet " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_\`abcdefghijklmnopqrstuvwxyz~¡¢£©®°ÇÉ•€★" \
 --nepoch 200 \
 --nh 512 \
+--use_aug \
+--use_noise \
 --pretrained /home/gaoxiao/code/crnn.pytorch/expr/IAM_2LSTM_nh512_mag8/0.77600.pth \
---trainName "IAM_512_aug"
+--trainName "IAM_GEN_512_valIAM_aug_noise_not_eval"
