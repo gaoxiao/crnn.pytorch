@@ -9,9 +9,9 @@ from tqdm import tqdm
 
 home = str(Path.home())
 
-data_dir = os.path.join(home, 'data/ocr_data/font_gen/img')
-gt_dir = os.path.join(home, 'data/ocr_data/font_gen/gt')
-font_dir = os.path.join(home, 'data/fonts/')
+data_dir = os.path.join(home, 'data/ocr_data/font_gen1/img')
+gt_dir = os.path.join(home, 'data/ocr_data/font_gen1/gt')
+font_dir = 'fonts'
 
 shutil.rmtree(data_dir, ignore_errors=True)
 shutil.rmtree(gt_dir, ignore_errors=True)
@@ -106,7 +106,7 @@ def main():
 
     fonts = get_fonts()
 
-    size = 100000
+    size = 10
     record = []
 
     for idx in tqdm(range(size)):
