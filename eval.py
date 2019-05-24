@@ -1,0 +1,111 @@
+import argparse
+import os
+from pathlib import Path
+
+import torch
+from PIL import Image
+from torch.autograd import Variable
+
+import dataset
+import models.crnn2 as crnn
+import utils
+
+home = str(Path.home())
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--imgH', type=int, default=32, help='the height of the input image to network')
+parser.add_argument('--imgW', type=int, default=100, help='the width of the input image to network')
+parser.add_argument('--nh', type=int, default=512, help='size of the lstm hidden state')
+parser.add_argument('--alphabet', type=str, default="")
+opt = parser.parse_args()
+
+alphabet = opt.alphabet
+converter = utils.strLabelConverter(alphabet)
+transformer = dataset.resizeNormalize((100, 32), augmentation=False, noise=False)
+
+
+def read_model(model_path):
+    nclass = len(alphabet) + 1
+    nc = 1
+    model = crnn.CRNN(opt.imgH, nc, nclass, opt.nh)
+    if torch.cuda.is_available():
+        print('using GPU')
+        model = model.cuda()
+    print('loading pretrained model from %s' % model_path)
+
+    state_dict = torch.load(model_path)
+    from collections import OrderedDict
+
+    new_state_dict = OrderedDict()
+    for k, v in state_dict.items():
+        if k.startswith('module.'):
+            k = k[7:]  # remove `module.`
+        new_state_dict[k] = v
+    # load params
+    model.load_state_dict(new_state_dict)
+    return model
+
+
+def get_imgs(img_path):
+    imgs = {}
+    for f in os.listdir(img_path):
+        if not f.endswith('png'):
+            continue
+        gt = os.path.splitext(f)[0]
+        f = os.path.join(img_path, f)
+        imgs[gt] = f
+    return imgs
+
+
+def run_model(model_path):
+    model = read_model(model_path)
+    model.eval()
+
+    # imgs = get_imgs(os.path.join(home, 'data/ocr_data/test_iam'))
+    imgs = get_imgs(os.path.join(home, 'data/ocr_data/me'))
+    t_cnt = 0
+    f_cnt = 0
+
+    for gt in imgs:
+        img_path = imgs[gt]
+        image = Image.open(img_path)
+        image = image.convert('L')
+        image = transformer(image)
+
+        if torch.cuda.is_available():
+            image = image.cuda()
+        image = image.view(1, *image.size())
+        image = Variable(image)
+
+        preds = model(image)
+
+        _, preds = preds.max(2)
+        preds = preds.transpose(1, 0).contiguous().view(-1)
+
+        preds_size = Variable(torch.IntTensor([preds.size(0)]))
+        raw_pred = converter.decode(preds.data, preds_size.data, raw=True)
+        sim_pred = converter.decode(preds.data, preds_size.data, raw=False)
+        if sim_pred != gt:
+            f_cnt += 1
+            # print('%-20s => %-20s, gt: %s' % (raw_pred, sim_pred, gt))
+        else:
+            t_cnt += 1
+
+    print('Model: {}\nTrue: {}, False: {}'.format(model_path, t_cnt, f_cnt))
+
+
+def main():
+    models = [
+        '/home/xiao/model/remote/IAM_GEN_512_valIAM_aug_noise_0.73925.pth',
+        '/home/xiao/model/remote/IAM_GEN_512_valIAM_aug_noise_not_eval_0.74987.pth',
+        '/home/xiao/model/remote/IAM_GEN_512_valIAM_noise_0.76850.pth',
+        '/home/xiao/model/remote/IAM_GEN_512_valIAM_0.81923.pth',
+        '/home/xiao/code/crnn.pytorch/expr/Font_aug/0.91077.pth',
+        '/home/xiao/code/crnn.pytorch/expr/IAM_dist_randColor/0.72300.pth',
+    ]
+    for model_path in models:
+        run_model(model_path)
+
+
+if __name__ == '__main__':
+    main()

@@ -88,6 +88,43 @@ class strLabelConverter(object):
                 index += l
             return texts
 
+    def decode_top3(self, t, length, raw=False):
+        """Decode encoded texts back into strs.
+
+        Args:
+            torch.IntTensor [length_0 + length_1 + ... length_{n - 1}]: encoded texts.
+            torch.IntTensor [n]: length of each text.
+
+        Raises:
+            AssertionError: when the texts and its length does not match.
+
+        Returns:
+            text (str or list of str): texts to convert.
+        """
+        if length.numel() == 1:
+            length = length[0]
+            assert t.numel() == length, "text with length: {} does not match declared length: {}".format(t.numel(), length)
+            if raw:
+                return ''.join([self.alphabet[i - 1] for i in t])
+            else:
+                char_list = []
+                for i in range(length):
+                    if t[i] != 0 and (not (i > 0 and t[i - 1] == t[i])):
+                        char_list.append(self.alphabet[t[i] - 1])
+                return ''.join(char_list)
+        else:
+            # batch mode
+            assert t.numel() == length.sum(), "texts with length: {} does not match declared length: {}".format(t.numel(), length.sum())
+            texts = []
+            index = 0
+            for i in range(length.numel()):
+                l = length[i]
+                texts.append(
+                    self.decode(
+                        t[index:index + l], torch.IntTensor([l]), raw=raw))
+                index += l
+            return texts
+
 
 class averager(object):
     """Compute average for `torch.Variable` and `torch.Tensor`. """

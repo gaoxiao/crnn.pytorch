@@ -1,12 +1,9 @@
 import argparse
 
-import Augmentor
 import numpy as np
 import torch
 from PIL import Image
 from torch.autograd import Variable
-from torchvision.transforms import functional as F
-from torchvision.transforms import transforms
 
 import dataset
 import models.crnn2 as crnn
@@ -50,6 +47,7 @@ model.load_state_dict(new_state_dict)
 converter = utils.strLabelConverter(alphabet)
 
 transformer = dataset.resizeNormalize((100, 32), augmentation=False, noise=False)
+
 image = Image.open(img_path)
 print(image.format, image.size, image.mode)
 im2arr = np.array(image)
@@ -60,27 +58,7 @@ print(image.format, image.size, image.mode)
 im2arr = np.array(image)
 print(im2arr.shape)
 
-p = Augmentor.Pipeline()
-p.black_and_white(probability=1)
-
-transform_train = transforms.Compose([
-    lambda img: F.adjust_contrast(img, 5),
-    # p.torch_transform(),
-    transforms.Resize((32, 100), Image.BILINEAR),
-])
-image2 = transform_train(image)
-image2.save('tmp.png')
-
-p = Augmentor.Pipeline()
-p.black_and_white(probability=1)
-transform_train = transforms.Compose([
-    lambda img: F.adjust_contrast(img, 5),
-    # p.torch_transform(),
-    transformer,
-])
-
-image = transform_train(image)
-
+image = transformer(image)
 if torch.cuda.is_available():
     image = image.cuda()
 image = image.view(1, *image.size())
