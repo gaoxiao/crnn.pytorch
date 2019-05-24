@@ -2,8 +2,8 @@
 
 CUDA_VISIBLE_DEVICES=3 python train.py \
 --adadelta \
---trainRoot tool/train2 \
---valRoot tool/val2 \
+--trainRoot tool/train \
+--valRoot tool/val \
 --cuda \
 --random_sample \
 --displayInterval 10 \
@@ -13,4 +13,4 @@ CUDA_VISIBLE_DEVICES=3 python train.py \
 --nepoch 200 \
 --nh 512 \
 --pretrained /home/gaoxiao/code/crnn.pytorch/expr/IAM_2LSTM_nh512_mag8/0.77600.pth \
---trainName "IAM&AllFont_finetune"
+--trainName "IAM_512_aug"

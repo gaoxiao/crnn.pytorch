@@ -226,8 +226,8 @@ def Gen_Font(trainImagePathList, trainLabelList, valImagePathList, valLabelList,
     split = int(len(image_path_list) * 0.95)
     trainImagePathList.extend(image_path_list[:split])
     trainLabelList.extend(label_list[:split])
-    # valImagePathList.extend(image_path_list[split:])
-    # valLabelList.extend(label_list[split:])
+    valImagePathList.extend(image_path_list[split:])
+    valLabelList.extend(label_list[split:])
 
 
 if __name__ == '__main__':
@@ -249,5 +249,5 @@ if __name__ == '__main__':
     vocb = sorted(vocb)
     print('vocb {}: {}'.format(len(vocb), ''.join(vocb)))
 
-    createDataset('train3', trainImagePathList, trainLabelList)
-    createDataset('val3', valImagePathList, valLabelList)
+    createDataset('train1', trainImagePathList, trainLabelList)
+    createDataset('val1', valImagePathList, valLabelList)
