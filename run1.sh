@@ -2,7 +2,7 @@
 
 CUDA_VISIBLE_DEVICES=1 python train.py \
 --adadelta \
---trainRoot tool/train3 \
+--trainRoot tool/train1 \
 --valRoot tool/val \
 --cuda \
 --random_sample \
@@ -12,6 +12,5 @@ CUDA_VISIBLE_DEVICES=1 python train.py \
 --alphabet " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_\`abcdefghijklmnopqrstuvwxyz~¡¢£©®°ÇÉ•€★" \
 --nepoch 200 \
 --nh 512 \
---pretrained "/home/xiao/code/crnn.pytorch/expr/Font/0.96115.pth" \
---use_aug \
---trainName "IAM_Font_tune_IAMval_aug"
+--pretrained /home/gaoxiao/code/crnn.pytorch/expr/IAM_2LSTM_nh512_mag8/0.77600.pth \
+--trainName "IAM_GEN_512_valIAM_noise"

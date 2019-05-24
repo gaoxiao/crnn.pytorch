@@ -15,6 +15,8 @@ from PIL import Image
 import numpy as np
 from matplotlib import pyplot as plt
 
+from tool.noise import noisy
+
 
 class lmdbDataset(Dataset):
 
@@ -82,14 +84,17 @@ class resizeNormalize(object):
         if augmentation:
             p = Augmentor.Pipeline()
             p.invert(probability=0.5)
-            p.random_color(1, 0, 1)
-            p.random_contrast(1, 0, 1)
-            p.random_brightness(1, 0, 1)
-            p.random_distortion(probability=0.5, grid_width=4, grid_height=4, magnitude=8)
+            # p.random_color(1, 0, 1)
+            # p.random_contrast(1, 0, 1)
+            # p.random_brightness(1, 0, 1)
+            # p.random_distortion(probability=0.5, grid_width=4, grid_height=4, magnitude=8)
+
             # p.random_erasing(probability=0.5, rectangle_area=0.5)
             # p.shear(probability=0.5, max_shear_left=10, max_shear_right=10)
             # p.skew_tilt(probability=0.5, magnitude=0.5)
+
             self.transform_train = transforms.Compose([
+                lambda img: noisy(img),
                 p.torch_transform(),
                 transforms.ToTensor(),
             ])

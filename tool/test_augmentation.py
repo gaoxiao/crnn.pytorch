@@ -1,17 +1,16 @@
 import argparse
 
 import Augmentor
-import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
-from skimage.util import random_noise
 from torchvision.transforms import transforms
-from torchvision.transforms import functional as F
+
+from tool.noise import noisy
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--imgH', type=int, default=32, help='the height of the input image to network')
 parser.add_argument('--imgW', type=int, default=100, help='the width of the input image to network')
-parser.add_argument('--img_path', type=str, default='/home/gaoxiao/Pictures/b.png')
+parser.add_argument('--img_path', type=str, default='/home/xiao/Pictures/b.png')
 
 opt = parser.parse_args()
 
@@ -61,21 +60,10 @@ plt.show()
 
 
 p = Augmentor.Pipeline()
-# p.invert(probability=0.5)
-p.random_color(1, 0, 1)
-p.random_contrast(1, 0, 1)
-p.random_brightness(1, 0, 1)
-
-
-def noisy(image):
-    np_img = np.array(image)
-    out = random_noise(np_img)
-    out = 255 * out
-    out = out.astype(np.uint8)
-    out = Image.fromarray(out)
-    return out
-    # return out
-
+p.invert(probability=0.5)
+# p.random_color(1, 0, 1)
+# p.random_contrast(1, 0, 1)
+# p.random_brightness(1, 0, 1)
 
 transform_train = transforms.Compose([
     # lambda img: F.adjust_contrast(img, 5),
