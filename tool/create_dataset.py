@@ -202,7 +202,7 @@ def IAM(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb
 
 
 def Gen_Font(trainImagePathList, trainLabelList, valImagePathList, valLabelList, vocb):
-    data_path = os.path.join(home, 'data/ocr_data/font_gen')
+    data_path = os.path.join(home, 'data/ocr_data/font_gen1')
     gt_file = os.path.join(data_path, 'gt/ALL.txt')
     img_dir = os.path.join(data_path, 'img')
 
@@ -249,5 +249,5 @@ if __name__ == '__main__':
     vocb = sorted(vocb)
     print('vocb {}: {}'.format(len(vocb), ''.join(vocb)))
 
-    createDataset('train1', trainImagePathList, trainLabelList)
-    createDataset('val1', valImagePathList, valLabelList)
+    createDataset('train2', trainImagePathList, trainLabelList)
+    createDataset('val2', valImagePathList, valLabelList)
