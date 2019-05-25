@@ -172,7 +172,7 @@ def main():
 
     fonts = get_fonts()
 
-    size = 10000
+    size = 300000
     record = []
 
     for idx in tqdm(range(size)):
