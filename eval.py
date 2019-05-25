@@ -15,7 +15,6 @@ home = str(Path.home())
 parser = argparse.ArgumentParser()
 parser.add_argument('--imgH', type=int, default=32, help='the height of the input image to network')
 parser.add_argument('--imgW', type=int, default=100, help='the width of the input image to network')
-parser.add_argument('--nh', type=int, default=512, help='size of the lstm hidden state')
 parser.add_argument('--alphabet', type=str, default="")
 opt = parser.parse_args()
 
@@ -24,10 +23,10 @@ converter = utils.strLabelConverter(alphabet)
 transformer = dataset.resizeNormalize((100, 32), augmentation=False, noise=False)
 
 
-def read_model(model_path):
+def read_model(model_path, hidden_number):
     nclass = len(alphabet) + 1
     nc = 1
-    model = crnn.CRNN(opt.imgH, nc, nclass, opt.nh)
+    model = crnn.CRNN(opt.imgH, nc, nclass, hidden_number)
     if torch.cuda.is_available():
         print('using GPU')
         model = model.cuda()
@@ -46,28 +45,50 @@ def read_model(model_path):
     return model
 
 
-def get_imgs(img_path):
-    imgs = {}
+def get_me_imgs(img_path):
+    imgs = []
     for f in os.listdir(img_path):
         if not f.endswith('png'):
             continue
         gt = os.path.splitext(f)[0]
         f = os.path.join(img_path, f)
-        imgs[gt] = f
+        imgs.append((gt, f))
     return imgs
 
 
-def run_model(model_path):
-    model = read_model(model_path)
+def get_font_imgs(img_path):
+    gt_file = os.path.join(img_path, 'gt/ALL.txt')
+    img_dir = os.path.join(img_path, 'img')
+
+    imgs = []
+
+    with open(gt_file) as f:
+        for l in f:
+            tokens = l.split(',')
+            img = tokens[0].strip() + '.png'
+            img = os.path.join(img_dir, img)
+            txt = ''.join(tokens[1:]).strip()
+
+            if not os.path.isfile(img):
+                print('file {} does not exist!'.format(img))
+                continue
+            imgs.append((txt, img))
+
+    return imgs
+
+
+def run_model(model_path, hidden_number):
+    model = read_model(model_path, hidden_number)
     model.eval()
 
     # imgs = get_imgs(os.path.join(home, 'data/ocr_data/test_iam'))
-    imgs = get_imgs(os.path.join(home, 'data/ocr_data/me'))
+    imgs = get_me_imgs(os.path.join(home, 'data/ocr_data/me'))
+    # imgs = get_font_imgs(os.path.join(home, 'data/ocr_data/font_gen1'))
+
     t_cnt = 0
     f_cnt = 0
 
-    for gt in imgs:
-        img_path = imgs[gt]
+    for gt, img_path in imgs:
         image = Image.open(img_path)
         image = image.convert('L')
         image = transformer(image)
@@ -95,16 +116,20 @@ def run_model(model_path):
 
 
 def main():
-    models = [
-        '/home/xiao/model/remote/IAM_GEN_512_valIAM_aug_noise_0.73925.pth',
-        '/home/xiao/model/remote/IAM_GEN_512_valIAM_aug_noise_not_eval_0.74987.pth',
-        '/home/xiao/model/remote/IAM_GEN_512_valIAM_noise_0.76850.pth',
-        '/home/xiao/model/remote/IAM_GEN_512_valIAM_0.81923.pth',
-        '/home/xiao/code/crnn.pytorch/expr/Font_aug/0.91077.pth',
-        '/home/xiao/code/crnn.pytorch/expr/IAM_dist_randColor/0.72300.pth',
-    ]
+    models = {
+        '/home/xiao/model/remote/IAM_GEN_512_valIAM_aug_noise_0.73925.pth': 512,
+        '/home/xiao/model/remote/IAM_GEN_512_valIAM_aug_noise_not_eval_0.74987.pth': 512,
+        # '/home/xiao/model/remote/IAM_GEN_512_valIAM_noise_0.76850.pth': 512,
+        # '/home/xiao/model/remote/IAM_GEN_512_valIAM_0.81923.pth': 512,
+        # '/home/xiao/model/remote/IAM_512_valIAM_aug_noise_0.74775.pth': 512,
+        # '/home/xiao/model/remote/IAM_GEN_256_valIAM_aug_noise_0.75262.pth': 256,
+        '/home/xiao/model/remote/IAM_GEN_256_valIAM_aug_noise_0.75738.pth': 256,
+
+        # '/home/xiao/code/crnn.pytorch/expr/Font_aug/0.91077.pth': 512,
+        # '/home/xiao/code/crnn.pytorch/expr/IAM_dist_randColor/0.72300.pth': 512,
+    }
     for model_path in models:
-        run_model(model_path)
+        run_model(model_path, models[model_path])
 
 
 if __name__ == '__main__':
